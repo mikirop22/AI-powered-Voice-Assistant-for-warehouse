@@ -1,0 +1,26 @@
+from gtts import gTTS
+import os
+import re
+
+# Define la ruta donde guardar los archivos de audio
+ruta_audios = "audios"
+
+# Si la carpeta no existe, créala
+if not os.path.exists(ruta_audios):
+    os.makedirs(ruta_audios)
+
+# Lee tu base de datos y genera archivos de audio para cada palabra
+with open("products.csv", "r") as file:
+    next(file)  # Salta la primera línea que contiene los encabezados
+    for line in file:
+        line = line.strip().split(";")
+        name = line[1]
+        # Elimina caracteres no válidos del nombre del archivo
+        cleaned_name = re.sub(r'[^\w\s]', '', name)
+        #print(cleaned_name, name)
+        # Reemplaza los espacios en el nombre con guiones bajos (_) o elimínalos
+        audio_file = os.path.join(ruta_audios, f"{cleaned_name.replace(' ', '_')}.mp3")
+        tts = gTTS(text=cleaned_name, lang='es')  # Genera el audio con la palabra
+        tts.save(audio_file)  # Guarda el archivo de audio
+
+print("Archivos de audio generados exitosamente.")
