@@ -16,7 +16,19 @@ def clean_name(name):
     name = name.replace(",", ".")
     # Reemplazar guiones por espacios
     name = name.replace("-", " ")
+    # Reemplazar '/' por 'por'
+    name = name.replace("/", " por ")
+    # Reemplazar 'ml' por 'mililitros'
+    name = name.replace("ml", "mililitros")
+    # Reemplazar 'mg' por 'miligramos'
+    name = name.replace("mg", "miligramos")
+    
+    for i, nom in enumerate(name):
+        if nom == 'x' or nom == 'X':
+            if name[i+1].isdigit() and name[i-1].isdigit():
+                name = name.replace("x", " por ")
     return name
+
 
 # Leer el conjunto de datos
 df = pd.read_csv("products.csv", sep=";")
