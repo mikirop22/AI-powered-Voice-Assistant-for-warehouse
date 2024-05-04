@@ -2,7 +2,7 @@ import pygame
 import random
 
 # Dimensiones de la ventana y de cada celda
-ANCHO = 1000
+ANCHO = 1400
 ALTO = 500
 CELDA_ANCHO = ANCHO // 7
 CELDA_ALTO = ALTO // 7
