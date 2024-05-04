@@ -2,7 +2,11 @@ import csv
 import speech_recognition as sr
 import numpy as np
 import librosa
+<<<<<<< HEAD
 from pydub import AudioSegment
+=======
+import pandas as pd
+>>>>>>> 08bdc8fb1da43d3a85cad077b497424ef80b085d
 
 model = 
 # Inicializar el reconocedor de voz
@@ -25,7 +29,34 @@ def extract_features(audio_path):
     mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=13)
     return mfccs
 
+def agregar_producto(name, input_csv, output_csv):
+    # Lista para almacenar las filas completas
+    filas_completas = []
 
+<<<<<<< HEAD
+=======
+    # Leer el archivo CSV de entrada y añadir los parámetros completos a la lista
+    with open(input_csv, 'r', newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file, delimiter=';')
+        for row in reader:
+            if row['name'] == name:
+                filas_completas.append(row)
+
+    # Si no se encontró ningún producto con el nombre dado, salir de la función
+    if not filas_completas:
+        print(f"No se encontró ningún producto con el nombre '{name}' en el archivo CSV.")
+        return
+
+    # Escribir los parámetros completos en un nuevo archivo CSV
+    with open(output_csv, 'w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=filas_completas[0].keys(), delimiter=';')
+        writer.writeheader()
+        for row in filas_completas:
+            writer.writerow(row)
+
+    print(f"Se ha añadido el elementos con el nombre '{name}' en el archivo '{output_csv}'.")
+
+>>>>>>> 08bdc8fb1da43d3a85cad077b497424ef80b085d
 
 while True:
     with sr.Microphone() as mic:
@@ -45,6 +76,7 @@ while True:
             # Si se detecta "añadir", se espera la siguiente palabra
             if "añadir" in text.lower():
                 print("Escuchando siguiente palabra...")
+<<<<<<< HEAD
                 audio = recognizer.listen(mic, timeout=None)
                 print("Grabación finalizada.")
 
@@ -59,6 +91,11 @@ while True:
                 # Llamar a la función recognize_custom con el audio en formato MP3
                 recognize_custom("audio_temp.mp3")
             
+=======
+                audio = recognizer.listen(mic)
+                product = recognize_custom(audio)
+                agregar_producto(product, products_new, )
+>>>>>>> 08bdc8fb1da43d3a85cad077b497424ef80b085d
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
