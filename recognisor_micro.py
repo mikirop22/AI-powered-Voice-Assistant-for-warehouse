@@ -2,6 +2,7 @@ import csv
 import speech_recognition as sr
 import numpy as np
 import librosa
+import pandas as pd
 
 # Cargar el modelo entrenado
 from tensorflow.keras.models import load_model
@@ -30,7 +31,32 @@ def extract_features_from_audio(audio):
     # Extraer características (MFCC) del audio
     mfccs = librosa.feature.mfcc(y=audio_data, sr=audio.sample_rate, n_mfcc=13)
     return mfccs
-    print("Palabra reconocida con el modelo entrenado: {}".format(audio))
+
+def agregar_producto(name, input_csv, output_csv):
+    # Lista para almacenar las filas completas
+    filas_completas = []
+
+    # Leer el archivo CSV de entrada y añadir los parámetros completos a la lista
+    with open(input_csv, 'r', newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file, delimiter=';')
+        for row in reader:
+            if row['name'] == name:
+                filas_completas.append(row)
+
+    # Si no se encontró ningún producto con el nombre dado, salir de la función
+    if not filas_completas:
+        print(f"No se encontró ningún producto con el nombre '{name}' en el archivo CSV.")
+        return
+
+    # Escribir los parámetros completos en un nuevo archivo CSV
+    with open(output_csv, 'w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=filas_completas[0].keys(), delimiter=';')
+        writer.writeheader()
+        for row in filas_completas:
+            writer.writerow(row)
+
+    print(f"Se ha añadido el elementos con el nombre '{name}' en el archivo '{output_csv}'.")
+
 
 while True:
     with sr.Microphone() as mic:
@@ -51,13 +77,8 @@ while True:
             if "añadir" in text.lower():
                 print("Escuchando siguiente palabra...")
                 audio = recognizer.listen(mic)
-<<<<<<< HEAD
-                recognize_custom(audio)
-                print("Palabra añadida.")
-            
-=======
                 product = recognize_custom(audio)
->>>>>>> af6b57d00b4a9ca3f9f2a4f5522039a38b290efa
+                agregar_producto(product, products_new, )
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
