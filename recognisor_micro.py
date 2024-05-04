@@ -35,9 +35,9 @@ def extract_features_from_audio(audio):
 <<<<<<< HEAD
 
 =======
+>>>>>>> 8f1628598140590ef8a9833f2d487607d2cf55a0
     print("Palabra reconocida con el modelo entrenado: {}".format(audio))
 >>>>>>> af6b57d00b4a9ca3f9f2a4f5522039a38b290efa
-
 
 while True:
     with sr.Microphone() as mic:
