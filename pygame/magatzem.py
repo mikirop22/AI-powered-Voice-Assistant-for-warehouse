@@ -15,9 +15,6 @@ class Warehouse:
     def set_obstacle(self, x, y):
         self.obstacles.add((x, y))
 
-    def set_one_way_aisle(self, x, y, direction):
-        self.one_way_aisles[(x, y)] = direction
-
     def heuristic(self, x, y, remaining_pick_locations):
         # A heuristic function estimating remaining distance based on the number of remaining pick locations
         return min(abs(x - px) + abs(y - py) for px, py in remaining_pick_locations)
