@@ -1,4 +1,5 @@
 import csv
+import os
 import speech_recognition as sr
 import numpy as np
 import librosa
@@ -10,32 +11,31 @@ recognizer = sr.Recognizer()
 def recognize_custom(audio):
     pass
 
+def agregar_producto(name, cantidad, input_csv, output_csv):
+    # Determinar si el archivo de salida existe y está vacío
+    output_exists_and_empty = os.path.isfile(output_csv) and os.stat(output_csv).st_size == 0
 
+    # Leer el archivo CSV de entrada y escribir las filas en el archivo de salida
+    with open(input_csv, 'r', newline='', encoding='utf-8') as input_file, \
+         open(output_csv, 'a', newline='', encoding='utf-8') as output_file:
+        
+        reader = csv.DictReader(input_file, delimiter=';')
+        fieldnames = ['id', 'cantidad']  # Selección de columnas para el archivo de salida
+        writer = csv.DictWriter(output_file, fieldnames=fieldnames, delimiter=';')
 
-def agregar_producto(name, input_csv, output_csv):
-    # Lista para almacenar las filas completas
-    filas_completas = []
+        # Escribir el encabezado solo si el archivo de salida no existe o está vacío
+        if output_exists_and_empty:
+            writer.writeheader()
 
-    # Leer el archivo CSV de entrada y añadir los parámetros completos a la lista
-    with open(input_csv, 'r', newline='', encoding='utf-8') as file:
-        reader = csv.DictReader(file, delimiter=';')
         for row in reader:
             if row['name'] == name:
-                filas_completas.append(row)
+                row['cantidad'] = cantidad
+                output_row = {'id': row['id'], 'cantidad': cantidad}  # Selección de columnas para cada fila
+                writer.writerow(output_row)
 
-    # Si no se encontró ningún producto con el nombre dado, salir de la función
-    if not filas_completas:
-        print(f"No se encontró ningún producto con el nombre '{name}' en el archivo CSV.")
-        return
+    print(f"Se ha añadido el elemento con el nombre '{name}' y la cantidad '{cantidad}' en el archivo '{output_csv}'.")
 
-    # Escribir los parámetros completos en un nuevo archivo CSV
-    with open(output_csv, 'w', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames=filas_completas[0].keys(), delimiter=';')
-        writer.writeheader()
-        for row in filas_completas:
-            writer.writerow(row)
 
-    print(f"Se ha añadido el elementos con el nombre '{name}' en el archivo '{output_csv}'.")
 
 
 while True:
@@ -85,7 +85,7 @@ while True:
                         cantidad = recognizer.recognize_google(audio, language="es-ES")
                         print(f"La cantidad es: {cantidad}")
                         # Añadir la cantidad tambieeen!!!
-                        agregar_producto(product_name, "productos.csv", "productos_nuevos.csv")
+                        agregar_producto(product_name, "products.csv", "products.csv")
                         print("Producto añadido exitosamente.")
                         x = False
 
