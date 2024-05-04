@@ -3,12 +3,10 @@ import speech_recognition as sr
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
 
-# Función para reconocer la siguiente palabra con el modelo entrenado
+# Función para reconocer la palabra con el modelo entrenado i relacionar-la con los datos del producto de la base de datos
 def recognize_custom(audio):
 
-
     print("Palabra reconocida con el modelo entrenado: {}".format(audio))
-
 
 
 while True:
@@ -34,5 +32,8 @@ while True:
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
+
         except sr.RequestError as e:
             print("Error ocurrido; {0}".format(e))
+
+# La llista generada s'ha 
