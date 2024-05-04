@@ -1,3 +1,4 @@
+import csv
 import speech_recognition as sr
 
 # Inicializar el reconocedor de voz
@@ -28,7 +29,7 @@ while True:
             if text.lower() == "añadir":
                 print("Escuchando siguiente palabra...")
                 audio = recognizer.listen(mic)
-                recognize_custom(audio)
+                product = recognize_custom(audio)
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
