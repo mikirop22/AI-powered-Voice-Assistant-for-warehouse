@@ -89,7 +89,7 @@ while True:
                         cantidad = recognizer.recognize_google(audio, language="es-ES")
                         print(f"La cantidad es: {cantidad}")
                         # Añadir la cantidad tambieeen!!!
-                        agregar_producto(product_name, "products.csv", "products.csv")
+                        agregar_producto(product_name, cantidad, "products.csv", "products.csv")
                         print("Producto añadido exitosamente.")
                         x = False
 
@@ -109,12 +109,6 @@ while True:
                         
                         # Llamar a la función recognize_custom con el audio en formato MP3
                         product_name = recognize_custom("audio_temp.mp3")
-
-
-
-
-
-            
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
