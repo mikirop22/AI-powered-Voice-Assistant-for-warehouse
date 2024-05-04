@@ -27,16 +27,20 @@ def agregar_producto(name, cantidad, input_csv, output_csv):
         if output_exists_and_empty:
             writer.writeheader()
 
+        # Verificar si la cantidad seleccionada no supera el stock
+        stock_superado = False
         for row in reader:
             if row['name'] == name:
-                row['cantidad'] = cantidad
-                output_row = {'id': row['id'], 'cantidad': cantidad}  # Selección de columnas para cada fila
-                writer.writerow(output_row)
+                if 'stock' in row and int(row['stock']) < cantidad:
+                    print(f"¡Advertencia! La cantidad seleccionada ({cantidad}) supera el stock disponible ({row['stock']}) para el producto '{name}'.")
+                    stock_superado = True
+                    break
 
-    print(f"Se ha añadido el elemento con el nombre '{name}' y la cantidad '{cantidad}' en el archivo '{output_csv}'.")
-
-
-
+        if not stock_superado:
+            row['cantidad'] = cantidad
+            output_row = {'id': row['id'], 'cantidad': cantidad}  # Selección de columnas para cada fila
+            writer.writerow(output_row)
+            print(f"Se ha añadido el elemento con el nombre '{name}' y la cantidad '{cantidad}' en el archivo '{output_csv}'.")
 
 while True:
     with sr.Microphone() as mic:
@@ -85,7 +89,7 @@ while True:
                         cantidad = recognizer.recognize_google(audio, language="es-ES")
                         print(f"La cantidad es: {cantidad}")
                         # Añadir la cantidad tambieeen!!!
-                        agregar_producto(product_name, "products.csv", "products.csv")
+                        agregar_producto(product_name, cantidad, "products.csv", "list.csv")
                         print("Producto añadido exitosamente.")
                         x = False
 
@@ -105,12 +109,6 @@ while True:
                         
                         # Llamar a la función recognize_custom con el audio en formato MP3
                         product_name = recognize_custom("audio_temp.mp3")
-
-
-
-
-
-            
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
