@@ -32,7 +32,7 @@ with open('products_new.csv', 'r') as file:
     for row in reader:
         product_id = row[0]
         fila = int(row[3]) - 1  # Les files comencen des de 1, però l'índex de la llista comença des de 0
-        columna = int(row[4]) - 1  # Les columnes comencen des de 1, però l'índex de la llista comença des de 0
+        columna = int(row[4])  # Les columnes comencen des de 1, però l'índex de la llista comença des de 0
         product_locations[product_id] = (fila, columna)
 
 # Pregunta a l'usuari els IDs dels productes fins que introdueixi "fi"
@@ -52,11 +52,17 @@ for product_id in product_ids:
 
 # Allista els productes seleccionats
 for product_id in product_ids:
+    
     (x,y) = product_locations[product_id]
     warehouse.add_pick_location(x,y)
+    warehouse.add_pick_location_id((x,y),product_id)
 
 # Busca i visualitza el camí mínim per recollir els productes seleccionats al magatzem
 print("\nCamí mínim per recollir els productes:")
 start_x, start_y = 0, 0
 path = warehouse.find_path(start_x, start_y)
-warehouse.visualize_path(path)
+
+if path is not None:
+    warehouse.visualize_path(path)
+else:
+    print("No se encontró un camino válido.")
