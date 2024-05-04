@@ -21,6 +21,7 @@ class Warehouse:
     def set_obstacle(self, x, y):
         self.obstacles.add((x, y))
 
+
     def set_one_way_aisle(self, x, y, direction):
         self.one_way_aisles[(x, y)] = direction
 
@@ -119,18 +120,19 @@ class Warehouse:
 
             # Llegamos a un punto de recogida, verificamos si estamos en la misma columna
             if (current_x, current_y) in self.pick_locations:
-                if current_x != 0 and current_x != self.width - 1:  # No estamos en una columna extrema
-                    closest_column = 0 if current_x <= self.width / 2 else self.width - 1
-                    next_column_path = self.a_star(current_x, current_y, closest_column, current_y, [])
-                    if next_column_path is not None:
-                        path += next_column_path[1:]
-                        current_x, current_y = closest_column, current_y
-                    else:
-                        print("No se encontró un camino hacia la columna {}".format(closest_column))
-                        break
-
+                columnes = [element[1] for element in remaining_pick_locations]
+                if current_x not in columnes:
+                    if current_x != 0 and current_x != self.width - 1:
+                        closest_column = 0 if current_x <= self.width / 2 else self.width - 1
+                        next_column_path = self.a_star(current_x, current_y, closest_column, current_y, [])
+                        if next_column_path is not None:
+                            path += next_column_path[1:]
+                            current_x, current_y = closest_column, current_y
+                        else:
+                            print("No se encontró un camino hacia la columna {}".format(closest_column))
+                            break
+            
         return path
-
 
 
     def visualize_path(self, path):
