@@ -22,7 +22,6 @@ with open('products_new.csv', 'r') as file:
 
         magatzem[fila][columna][costat] = product_id  # Reemplaza el valor en la posición 2 de la lista
         
-
 warehouse = Warehouse(10, 10, magatzem)
 
 # Llegeix les dades del document products_new.csv i guarda les ubicacions dels productes
