@@ -40,14 +40,23 @@ with open('products_new.csv', 'r') as file:
 
 # Pregunta a l'usuari els IDs dels productes fins que introdueixi "fi"
 product_ids = []
-while True:
+quantitas = {}
+with open('list.csv', 'r') as file:
+    reader = csv.reader(file, delimiter=';')
+    for row in reader:
+        product_id = row[0]
+        product_ids.append(product_id)
+        quantitat = row[1]
+        quantitas[product_id] = quantitat
+    
+"""while True:
     product_id = input("Entra l'ID del producte (o 'fi' per acabar): ")
     if product_id == "fi":
         break
     if product_id in product_locations:
         product_ids.append(product_id)
     else:
-        print("ID de producte invàlid. Torna-ho a provar.")
+        print("ID de producte invàlid. Torna-ho a provar.")"""
 
 print("Productes seleccionats:")
 for product_id in product_ids:
