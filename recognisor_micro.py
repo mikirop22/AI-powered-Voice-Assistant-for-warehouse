@@ -89,7 +89,7 @@ while True:
                         cantidad = recognizer.recognize_google(audio, language="es-ES")
                         print(f"La cantidad es: {cantidad}")
                         # Añadir la cantidad tambieeen!!!
-                        agregar_producto(product_name, cantidad, "products.csv", "products.csv")
+                        agregar_producto(product_name, cantidad, "products.csv", "list.csv")
                         print("Producto añadido exitosamente.")
                         x = False
 
