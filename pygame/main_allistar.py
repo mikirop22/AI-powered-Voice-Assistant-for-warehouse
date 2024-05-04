@@ -21,8 +21,11 @@ with open('products_new.csv', 'r') as file:
             costat = 2
 
         magatzem[fila][columna][costat] = product_id  # Reemplaza el valor en la posición 2 de la lista
-        
-warehouse = Warehouse(10, 10, magatzem)
+
+"""for fila in magatzem:
+    print(fila)"""
+
+warehouse = Warehouse(12, 10, magatzem)
 
 # Llegeix les dades del document products_new.csv i guarda les ubicacions dels productes
 product_locations = {}
@@ -31,8 +34,8 @@ with open('products_new.csv', 'r') as file:
     next(reader)  # Salta la primera fila (encapçalament)
     for row in reader:
         product_id = row[0]
-        fila = int(row[3]) - 1  # Les files comencen des de 1, però l'índex de la llista comença des de 0
-        columna = int(row[4])  # Les columnes comencen des de 1, però l'índex de la llista comença des de 0
+        fila = int(row[3]) 
+        columna = int(row[4]) 
         product_locations[product_id] = (fila, columna)
 
 # Pregunta a l'usuari els IDs dels productes fins que introdueixi "fi"
@@ -60,7 +63,7 @@ for product_id in product_ids:
 # Busca i visualitza el camí mínim per recollir els productes seleccionats al magatzem
 print("\nCamí mínim per recollir els productes:")
 start_x, start_y = 0, 0
-path = warehouse.find_path(start_x, start_y)
+path = warehouse.find_min_path(start_x, start_y)
 
 if path is not None:
     warehouse.visualize_path(path)

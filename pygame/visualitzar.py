@@ -62,7 +62,7 @@ def visualitza(magatzem, camino, pick_locations):
                         ventana.blit(imagen_estanteria, (j * CELDA_ANCHO, i * CELDA_ALTO + k * (CELDA_ALTO / 3)))
 
                     if elemento in ids_a_dibujar:
-                        pygame.draw.circle(ventana, AZUL, (j * CELDA_ANCHO + CELDA_ANCHO // 2, i * CELDA_ALTO + k * (CELDA_ALTO // 3) + (CELDA_ALTO // 6) * (k+1)), 10)
+                        pygame.draw.circle(ventana, AZUL, (i * CELDA_ANCHO + CELDA_ANCHO // 2, j * CELDA_ALTO + k * (CELDA_ALTO // 3) + (CELDA_ALTO // 6) * (k+1)), 10)
 
         # Dibujar el camino
         for pos in camino:
