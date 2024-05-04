@@ -2,41 +2,29 @@ import csv
 import speech_recognition as sr
 import numpy as np
 import librosa
+from pydub import AudioSegment
 
-# Cargar el modelo entrenado
-from tensorflow.keras.models import load_model
-
-model = load_model("model.h5")
+model = 
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
 
 # Función para reconocer la palabra con el modelo entrenado i relacionar-la con los datos del producto de la base de datos
 def recognize_custom(audio):
     # Convertir el audio capturado por el micrófono en características (MFCC)
-    mfccs = extract_features_from_audio(audio)
-    
-    
+    mfccs = extract_features(audio)
+
     # Predecir utilizando tu modelo entrenado
     prediction = model.predict_classes(mfccs)
     
     # Imprimir la palabra predicha (o hacer lo que desees con la predicción)
     print("Palabra predicha con el modelo entrenado:", prediction)
 
-# Función para extraer características (MFCC) del audio
-def extract_features_from_audio(audio):
-    # Convertir el audio a matriz numérica
-    audio_data = np.frombuffer(audio.frame_data, dtype=np.int16)
-    
-    # Extraer características (MFCC) del audio
-    mfccs = librosa.feature.mfcc(y=audio_data, sr=audio.sample_rate, n_mfcc=13)
+def extract_features(audio_path):
+    # Aquí puedes usar librosa para extraer características de audio, como los coeficientes cepstrales en frecuencia (MFCC)
+    audio, sr = librosa.load(audio_path, sr=None)
+    mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=13)
     return mfccs
 
-
-<<<<<<< HEAD
-
-=======
-    print("Palabra reconocida con el modelo entrenado: {}".format(audio))
->>>>>>> af6b57d00b4a9ca3f9f2a4f5522039a38b290efa
 
 
 while True:
@@ -57,14 +45,20 @@ while True:
             # Si se detecta "añadir", se espera la siguiente palabra
             if "añadir" in text.lower():
                 print("Escuchando siguiente palabra...")
-                audio = recognizer.listen(mic)
-<<<<<<< HEAD
-                recognize_custom(audio)
-                print("Palabra añadida.")
+                audio = recognizer.listen(mic, timeout=None)
+                print("Grabación finalizada.")
+
+                # Guardar el audio en formato WAV
+                with open("audio_temp.wav", "wb") as f:
+                    f.write(audio.get_wav_data())
+                
+                # Convertir el audio a formato MP3
+                sound = AudioSegment.from_wav("audio_temp.wav")
+                sound.export("audio_temp.mp3", format="mp3")
+                
+                # Llamar a la función recognize_custom con el audio en formato MP3
+                recognize_custom("audio_temp.mp3")
             
-=======
-                product = recognize_custom(audio)
->>>>>>> af6b57d00b4a9ca3f9f2a4f5522039a38b290efa
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
