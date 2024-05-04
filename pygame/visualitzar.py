@@ -10,14 +10,18 @@ CELDA_ALTO = ALTO // 7
 # Colores
 NEGRO = (0, 0, 0)
 BLANCO = (255, 255, 255)
-MARRON = (139, 69, 19)
 ROJO = (255, 0, 0)
 AZUL = (0, 0, 255)
 
-# Cargar la imagen "terra.jpg"
-imagen_terra = pygame.image.load("terra.jpg")
+# Cargar la imagen "estanteria.jpg"
+imagen_estanteria = pygame.image.load("pygame/estanteria.jpg")
 # Escalar la imagen al tamaño de la celda
-imagen_terra = pygame.transform.scale(imagen_terra, (CELDA_ANCHO, int(CELDA_ALTO / 3)))
+imagen_estanteria = pygame.transform.scale(imagen_estanteria, (CELDA_ANCHO, int(CELDA_ALTO / 3)))
+
+# Cargar la imagen del suelo
+imagen_suelo = pygame.image.load("pygame/terra.jpg")
+# Escalar la imagen al tamaño de la celda
+imagen_suelo = pygame.transform.scale(imagen_suelo, (CELDA_ANCHO, int(CELDA_ALTO / 3)))
 
 # Función para generar un número aleatorio de identificación
 def generar_id():
@@ -54,11 +58,10 @@ while ejecutando:
         for j in range(5+2):
             celda = matriz[i][j]
             for k, elemento in enumerate(celda):
+                ventana.blit(imagen_suelo, (j * CELDA_ANCHO, i * CELDA_ALTO + k * (CELDA_ALTO / 3)))
                 if elemento is not None:
-                    color = MARRON
-                else:
-                    # Dibujar la imagen en lugar del rectángulo gris
-                    ventana.blit(imagen_terra, (j * CELDA_ANCHO, i * CELDA_ALTO + k * (CELDA_ALTO / 3)))
+                    # Dibujar la imagen de la estantería como fondo
+                    ventana.blit(imagen_estanteria, (j * CELDA_ANCHO, i * CELDA_ALTO + k * (CELDA_ALTO / 3)))
 
                 # Lista de IDs para los cuales queremos dibujar círculos azules
                 ids_a_dibujar_azul = [2, 4, 7]
