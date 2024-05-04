@@ -2,39 +2,20 @@ import csv
 import speech_recognition as sr
 import numpy as np
 import librosa
-<<<<<<< HEAD
-from pydub import AudioSegment
-=======
 import pandas as pd
->>>>>>> 08bdc8fb1da43d3a85cad077b497424ef80b085d
 
-model = 
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
 
-# Función para reconocer la palabra con el modelo entrenado i relacionar-la con los datos del producto de la base de datos
 def recognize_custom(audio):
-    # Convertir el audio capturado por el micrófono en características (MFCC)
-    mfccs = extract_features(audio)
+    pass
 
-    # Predecir utilizando tu modelo entrenado
-    prediction = model.predict_classes(mfccs)
-    
-    # Imprimir la palabra predicha (o hacer lo que desees con la predicción)
-    print("Palabra predicha con el modelo entrenado:", prediction)
 
-def extract_features(audio_path):
-    # Aquí puedes usar librosa para extraer características de audio, como los coeficientes cepstrales en frecuencia (MFCC)
-    audio, sr = librosa.load(audio_path, sr=None)
-    mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=13)
-    return mfccs
 
 def agregar_producto(name, input_csv, output_csv):
     # Lista para almacenar las filas completas
     filas_completas = []
 
-<<<<<<< HEAD
-=======
     # Leer el archivo CSV de entrada y añadir los parámetros completos a la lista
     with open(input_csv, 'r', newline='', encoding='utf-8') as file:
         reader = csv.DictReader(file, delimiter=';')
@@ -56,7 +37,6 @@ def agregar_producto(name, input_csv, output_csv):
 
     print(f"Se ha añadido el elementos con el nombre '{name}' en el archivo '{output_csv}'.")
 
->>>>>>> 08bdc8fb1da43d3a85cad077b497424ef80b085d
 
 while True:
     with sr.Microphone() as mic:
@@ -76,7 +56,6 @@ while True:
             # Si se detecta "añadir", se espera la siguiente palabra
             if "añadir" in text.lower():
                 print("Escuchando siguiente palabra...")
-<<<<<<< HEAD
                 audio = recognizer.listen(mic, timeout=None)
                 print("Grabación finalizada.")
 
@@ -89,13 +68,49 @@ while True:
                 sound.export("audio_temp.mp3", format="mp3")
                 
                 # Llamar a la función recognize_custom con el audio en formato MP3
-                recognize_custom("audio_temp.mp3")
-            
-=======
+                product_name = recognize_custom("audio_temp.mp3")
+
+                # Comprobar si el producto es correcto
+                print(f"Producto detectado: {product_name}")
+                print("¿Es correcto? (sí/no)")
                 audio = recognizer.listen(mic)
-                product = recognize_custom(audio)
-                agregar_producto(product, products_new, )
->>>>>>> 08bdc8fb1da43d3a85cad077b497424ef80b085d
+                response = recognizer.recognize_google(audio, language="es-ES")
+                x  =  True
+                while x:
+                    if "salir" in response.lower():
+                        break
+                    if "sí" in response.lower():
+                        print("Que cantidad quieres?")
+                        audio = recognizer.listen(mic)
+                        cantidad = recognizer.recognize_google(audio, language="es-ES")
+                        print(f"La cantidad es: {cantidad}")
+                        # Añadir la cantidad tambieeen!!!
+                        agregar_producto(product_name, "productos.csv", "productos_nuevos.csv")
+                        print("Producto añadido exitosamente.")
+                        x = False
+
+                    elif "no" in response.lower():
+                        print("Por favor, repita el nombre del producto.")
+                        print("Escuchando siguiente palabra...")
+                        audio = recognizer.listen(mic, timeout=None)
+                        print("Grabación finalizada.")
+
+                        # Guardar el audio en formato WAV
+                        with open("audio_temp.wav", "wb") as f:
+                            f.write(audio.get_wav_data())
+                        
+                        # Convertir el audio a formato MP3
+                        sound = AudioSegment.from_wav("audio_temp.wav")
+                        sound.export("audio_temp.mp3", format="mp3")
+                        
+                        # Llamar a la función recognize_custom con el audio en formato MP3
+                        product_name = recognize_custom("audio_temp.mp3")
+
+
+
+
+
+            
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
