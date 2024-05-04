@@ -5,10 +5,8 @@ class Warehouse:
     def __init__(self, width, height, magatzem):
         self.width = width
         self.height = height
-        self.grid = [[0] * width for _ in range(height)]  # Initialize grid with all zeros
         self.pick_locations = []
         self.obstacles = set()
-        self.one_way_aisles = {}
         self.magatzem = magatzem
 
     def add_pick_location(self, x, y):
