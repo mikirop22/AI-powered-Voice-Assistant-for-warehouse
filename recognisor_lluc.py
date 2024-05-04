@@ -7,7 +7,7 @@ import speech_recognition as sr
 from pydub import AudioSegment
 
 # Load the MP3 file
-mp3_file = "tu_archivo.mp3"
+mp3_file = "audios/ADTAB_GATO_12mg_05_2kg_1cp.mp3"
 audio = AudioSegment.from_mp3(mp3_file)
 
 # Export the audio to WAV format
