@@ -36,4 +36,4 @@ while True:
         except sr.RequestError as e:
             print("Error ocurrido; {0}".format(e))
 
-# La llista generada s'ha de guardar i pujar d'alguna manera al núbol, per tal que es pugui accedir de forma f
+# La llista generada s'ha de guardar i pujar d'alguna manera al núbol, per tal que es pugui accedir de forma fàcil desde la terminal del treballador del magatzem
