@@ -1,3 +1,4 @@
+import csv
 import speech_recognition as sr
 import numpy as np
 import librosa
@@ -9,7 +10,7 @@ model = load_model("model.h5")
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
 
-# Función para reconocer la siguiente palabra con el modelo entrenado
+# Función para reconocer la palabra con el modelo entrenado i relacionar-la con los datos del producto de la base de datos
 def recognize_custom(audio):
     # Convertir el audio capturado por el micrófono en características (MFCC)
     mfccs = extract_features_from_audio(audio)
@@ -31,8 +32,11 @@ def extract_features_from_audio(audio):
     return mfccs
 
 
+<<<<<<< HEAD
 
-
+=======
+    print("Palabra reconocida con el modelo entrenado: {}".format(audio))
+>>>>>>> af6b57d00b4a9ca3f9f2a4f5522039a38b290efa
 
 
 while True:
@@ -54,11 +58,18 @@ while True:
             if "añadir" in text.lower():
                 print("Escuchando siguiente palabra...")
                 audio = recognizer.listen(mic)
+<<<<<<< HEAD
                 recognize_custom(audio)
                 print("Palabra añadida.")
             
+=======
+                product = recognize_custom(audio)
+>>>>>>> af6b57d00b4a9ca3f9f2a4f5522039a38b290efa
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
+
         except sr.RequestError as e:
             print("Error ocurrido; {0}".format(e))
+
+# La llista generada s'ha de guardar i pujar d'alguna manera al núbol, per tal que es pugui accedir de forma fàcil desde la terminal del treballador del magatzem
