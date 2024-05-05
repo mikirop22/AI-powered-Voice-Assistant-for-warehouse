@@ -126,14 +126,15 @@ with open('products_new.csv', 'r') as file:
 
 # Selecciona els productes de la llista a recollir
 product_ids = []
-nom_i_quantitas = {}
+nom_quantitas_pos = {}
 with open(f'treballador/{list_name}.csv', 'r') as file:
     reader = csv.reader(file, delimiter=';')
     for row in reader:
         product_id = row[0]
         product_ids.append(product_id)
         quantitat = row[1]
-        nom_i_quantitas[product_id] = [noms[product_id], quantitat]
+        pos = product_locations[product_id]
+        nom_quantitas_pos[product_id] = [noms[product_id], quantitat, (pos[0], pos[1])]
 
 print("Productes seleccionats:")
 for product_id in product_ids:
@@ -153,6 +154,6 @@ final_x, final_y = 11, 11
 path = warehouse.find_min_path(start_x, start_y, final_x, final_y)
 
 if path is not None:
-    warehouse.visualize_path(path, nom_i_quantitas)
+    warehouse.visualize_path(path, nom_quantitas_pos)
 else:
     speak("No se encontró un camino válido.")
