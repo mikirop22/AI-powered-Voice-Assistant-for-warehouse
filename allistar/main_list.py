@@ -11,6 +11,34 @@ import pyttsx3
 from gtts import gTTS
 from pydub.playback import play
 
+# Función para limpiar el nombre
+def clean_name(name):
+    # Reemplazar comas por puntos decimales
+    name = name.replace(",", ".")
+    # Reemplazar guiones por espacios
+    name = name.replace("-", " ")
+    # Reemplazar '/' por 'por'
+    name = name.replace("/", " por ")
+    # Reemplazar 'ml' por 'mililitros'
+    name = name.replace("ml", "mililitros")
+    # Reemplazar 'mg' por 'miligramos'
+    name = name.replace("mg", "miligramos")
+    
+    for i, nom in enumerate(name):
+        if nom == 'x' or nom == 'X':
+            if name[i+1].isdigit() and name[i-1].isdigit():
+                name = name.replace("x", " por ")
+    return name
+
+# Leer el conjunto de datos
+df = pd.read_csv("products_new.csv", sep=";")
+
+# Limpiar los nombres en el dataframe
+df["cleaned_name"] = df["name"].apply(clean_name)
+
+# Guardar el nuevo DataFrame en un archivo CSV
+df.to_csv("products_new.csv", sep=";", index=False)
+
 
 from pydub import AudioSegment
 
@@ -52,6 +80,10 @@ def eliminar_ultimo_producto(output_csv):
     
 
 def agregar_producto(name, cantidad, input_csv, output_csv):
+    
+    # Ruta completa del archivo dentro de la carpeta "treballador"
+    ruta = f"treballador/{output_csv}"
+    
     # Determinar si el archivo de salida existe y está vacío
     output_exists_and_empty = os.path.isfile(output_csv) and os.stat(output_csv).st_size == 0
 
@@ -70,7 +102,7 @@ def agregar_producto(name, cantidad, input_csv, output_csv):
         # Verificar si la cantidad seleccionada no supera el stock
         stock_superado = False
         for row in reader:
-            if row['name'] == name:
+            if row['cleaned_name'] == name:
                 if 'stock' in row and int(row['stock']) < cantidad:
                     print(f"¡Advertencia! La cantidad seleccionada ({cantidad}) supera el stock disponible ({row['stock']}) para el producto '{name}'.")
                     stock_superado = True
@@ -104,12 +136,12 @@ while True:
         if activar:
             speak("¿En que puedo ayudarte?")
             activar = False
-            recognizer.adjust_for_ambient_noise(mic, duration=0.3)
+            recognizer.adjust_for_ambient_noise(mic, duration=0.4)
             audio = recognizer.listen(mic)
         
         else:
             speak("¿Que más quieres hacer?")    
-            recognizer.adjust_for_ambient_noise(mic, duration=0.3)
+            recognizer.adjust_for_ambient_noise(mic, duration=0.4)
             audio = recognizer.listen(mic)
 
         try:
@@ -121,20 +153,21 @@ while True:
             if "salir" in text.lower():
                 break
 
-            if "crear lista" in text.lower():
+            elif "crear" and "lista" in text.lower():
                 print("Creando lista...")
                 speak("Que nombre le quieres poner a la lista?")
                 audio = recognizer.listen(mic)
                 nombre_lista = recognizer.recognize_google(audio, language="es-ES")
                 speak(f"El nombre de la lista es: {nombre_lista}")
+                ruta = f'{nombre_lista}.csv'
                 lista_creada = True
 
             
-            if lista_creada:    
+            elif lista_creada:    
                 # Si se detecta "añadir", se espera la siguiente palabra
                 if "añadir" in text.lower():
                     speak("Escuchando producto")
-                    audio = recognizer.listen(mic, timeout=None)
+                    audio = recognizer.listen(mic)
                     text = recognizer.recognize_google(audio, language="es-ES")
                     print("Grabación finalizada")
                     print("Dijiste: {}".format(text))
@@ -166,41 +199,63 @@ while True:
                     if palabra_tecnica is not None:
                         print(f"Palabra técnica correspondiente a '{text}': {palabra_tecnica}")
                         speak(f"Producto detectado: {palabra_tecnica}")
+                    
+                    finish = False
+                    while not finish:
                         speak("¿Es correcto? ")
                         print("¿Es correcto? (sí/no)")
                         audio = recognizer.listen(mic)
                         response = recognizer.recognize_google(audio, language="es-ES")
-                        
+                            
                         if "salir" in response.lower():
                             break
-                        
+
                         if "si" in response.lower() or "sí" in response.lower():
-                            speak("¿Qué cantidad quieres?")
-                            audio = recognizer.listen(mic)
-                            cantidad = recognizer.recognize_google(audio, language="es-ES")
-                            print(f"La cantidad es: {cantidad}")
-                            # ¡Añadir la cantidad también!
-                            agregar_producto(palabra_tecnica, cantidad, "products_new.csv", "productos_nuevos.csv")
-                            speak("Producto añadido exitosamente.")
-                            x = False
-                            
+                            cantidad = True
+                            while cantidad:
+                                speak("¿Qué cantidad quieres? ")
+                                audio = recognizer.listen(mic)
+                                cantidad = recognizer.recognize_google(audio, language="es-ES")
+
+                                try:
+                                    cantidad_entero = int(cantidad)
+                                    speak(f"La cantidad es: {cantidad_entero}")
+                                    # Aquí puedes usar cantidad_entero como un número entero
+                                    # Por ejemplo, puedes usarlo para agregar el producto con la cantidad
+                                    # Agregar el producto según tu implementación
+                                    agregar_producto(palabra_tecnica, cantidad_entero, "products_new.csv", ruta)
+                                    print("Producto añadido exitosamente.")
+                                    cantidad = False
+                                
+                                except ValueError:
+                                    print("La cantidad ingresada no es un número entero válido. Por favor, intenta de nuevo.")
+
+                        
+                            finish = True
+
                         elif "no" in response.lower():
-                            pass
+                            finish = True
+                        
+                        else:
+                            print("No entiendo la respuesta, por favor intenta de nuevo.")
+                            
 
                         
                     else:
                         print(f"No se encontró una palabra técnica para '{text}'")
                         
-                if "eliminar ultima" in text.lower():
+                elif "eliminar ultima" in text.lower():
                     speak("Eliminando el último producto")
                     # Eliminar el último producto de la lista
-                    eliminar_ultimo_producto("productos_nuevos.csv")
+                    eliminar_ultimo_producto(ruta)
                 
-                if "terminar" in text.lower():
+                elif "terminar" in text.lower():
                     speak(f"Enviando lista {nombre_lista}")
                     enviar = True
                     break
-
+                
+                else:
+                    speak(f'Lo siento, esa orden no está disponible')
                 
         except sr.UnknownValueError:
             speak("Lo siento, no pude entender el audio.")
@@ -223,11 +278,12 @@ if enviar:
     # Autentica con las credenciales
     drive_service = build('drive', 'v3', credentials=credentials)
 
+
     # Carga el archivo 'list.csv' a Google Drive
-    file_metadata = {'name': 'productos_nuevos.csv'}
-    media = MediaFileUpload('productos_nuevos.csv', mimetype='text/csv')
+    file_metadata = {'name': ruta}
+    media = MediaFileUpload(ruta, mimetype='text/csv')
     file = drive_service.files().create(body=file_metadata,
                                         media_body=media,
                                         fields='id').execute()
 
-    print('Archivo "productos_nuevos.csv" cargado correctamente con el ID:', file.get('id'))
+    print(f'Archivo "{nombre_lista}.csv" cargado correctamente con el ID:', file.get('id'))
