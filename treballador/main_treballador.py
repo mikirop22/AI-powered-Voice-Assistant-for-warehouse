@@ -1,4 +1,5 @@
 import csv
+import os
 from magatzem import Warehouse
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
@@ -14,13 +15,24 @@ drive_service = build('drive', 'v3', credentials=credentials)
 # Solicita al usuario que ingrese el ID del archivo 'list.csv'
 file_id = input("Por favor, ingresa el ID de la lista: ")
 
+# Directorio donde deseas guardar el archivo
+directory = 'treballador/'
+
+# Verifica si el directorio existe, si no, créalo
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+# Ruta completa del archivo
+file_path = os.path.join(directory, 'list.csv')
+
 # Descarga el archivo 'list.csv' de Google Drive
 request = drive_service.files().get_media(fileId=file_id)
-fh = open('list.csv', 'wb')
-downloader = MediaIoBaseDownload(fh, request)
-done = False
-while not done:
-    status, done = downloader.next_chunk()
+with open(file_path, 'wb') as fh:
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while not done:
+        status, done = downloader.next_chunk()
+
 
 print('Archivo "list.csv" descargado correctamente.')
 
@@ -65,9 +77,11 @@ with open('products_new.csv', 'r') as file:
 # Pregunta a l'usuari els IDs dels productes fins que introdueixi "fi"
 product_ids = []
 quantitas = {}
-with open('list.csv', 'r') as file:
+with open('treballador/list.csv', 'r') as file:
     reader = csv.reader(file, delimiter=';')
+    print(2,reader)
     for row in reader:
+        print(1,row)
         product_id = row[0]
         product_ids.append(product_id)
         quantitat = row[1]
