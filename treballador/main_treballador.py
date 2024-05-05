@@ -50,11 +50,7 @@ with open('products_new.csv', 'r') as file:
             costat = 0
         elif row[5] == 'R':
             costat = 2
-
         magatzem[fila][columna][costat] = product_id  # Reemplaza el valor en la posición 2 de la lista
-
-"""for fila in magatzem:
-    print(fila)"""
 
 warehouse = Warehouse(12, 10, magatzem)
 
@@ -72,21 +68,17 @@ with open('products_new.csv', 'r') as file:
         nom = row[1]
         noms[product_id] = nom
 
-# Pregunta a l'usuari els IDs dels productes fins que introdueixi "fi"
+# Selecciona els productes de la llista a recollir
 product_ids = []
-nom_quantitas_pos = {}
-with open('treballador/list.csv', 'r') as file:
+nom_i_quantitas = {}
+with open(f'treballador/{list_name}.csv', 'r') as file:
     reader = csv.reader(file, delimiter=';')
-    print(2,reader)
     for row in reader:
-        print(1,row)
         product_id = row[0]
         product_ids.append(product_id)
         quantitat = row[1]
-        pos = product_locations[product_id]
-        nom_quantitas_pos[product_id] = [noms[product_id], quantitat, (pos[0],pos[1])]
+        nom_i_quantitas[product_id] = [noms[product_id], quantitat]
 
-print(nom_quantitas_pos)
 print("Productes seleccionats:")
 for product_id in product_ids:
     print("- ID:", product_id)
@@ -105,6 +97,6 @@ final_x, final_y = 11, 11
 path = warehouse.find_min_path(start_x, start_y, final_x, final_y)
 
 if path is not None:
-    warehouse.visualize_path(path, nom_quantitas_pos)
+    warehouse.visualize_path(path, nom_i_quantitas)
 else:
     print("No se encontró un camino válido.")
