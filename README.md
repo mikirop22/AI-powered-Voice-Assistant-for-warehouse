@@ -34,3 +34,6 @@ In developing our latest warehouse efficiency innovation, we faced challenges in
 Most notably, we discovered a myriad of libraries for understanding speech input and facilitating communication with users. Exploring various libraries for natural language processing enabled us to decipher user commands accurately and efficiently. Additionally, we delved into numerous libraries for voice interaction, enhancing our understanding of speech recognition and synthesis.
 
 Furthermore, we gained valuable insights into the realm of graphical user interface design. Thiss allowed us to create intuitive interfaces that seamlessly communicate optimized routes to warehouse workers. Understanding the nuances of raphical user interface design proved instrumental in crafting user-friendly experiences that enhance productivity and efficiency in warehouse environments.
+
+## Folders explanation
+In 'allistar', we have the files related to the virtual assistant for creating product lists from our database through voice. By running main_list.py, it can generate and send this list through our AI-powered virtual assistant. In the 'treballador' folder, we have files that read this created list and find the optimal path knowing the locations of the products, oriented towards the company's workers.
