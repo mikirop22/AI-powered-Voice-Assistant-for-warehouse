@@ -12,30 +12,25 @@ credentials = Credentials.from_service_account_file('subtle-circlet-422322-b5-50
 # Autentica con las credenciales
 drive_service = build('drive', 'v3', credentials=credentials)
 
-# Solicita al usuario que ingrese el ID del archivo 'list.csv'
-file_id = input("Por favor, ingresa el ID de la lista: ")
+# Solicita al usuario que ingrese el nombre e ID del archivo
+list_name = input("Por favor, ingresa el nombre de la lista: ")
+list_id = input("Por favor, ingresa el ID de la lista: ")
 
 # Directorio donde deseas guardar el archivo
 directory = 'treballador/'
 
-# Verifica si el directorio existe, si no, créalo
-if not os.path.exists(directory):
-    os.makedirs(directory)
+# Ruta completa del archivo con el nombre proporcionado por el usuario
+file_path = os.path.join(directory, f'{list_name}.csv')
 
-# Ruta completa del archivo
-file_path = os.path.join(directory, 'list.csv')
-
-# Descarga el archivo 'list.csv' de Google Drive
-request = drive_service.files().get_media(fileId=file_id)
+# Descarga el archivo con el nombre proporcionado por el usuario desde Google Drive
+request = drive_service.files().get_media(fileId=list_id)
 with open(file_path, 'wb') as fh:
     downloader = MediaIoBaseDownload(fh, request)
     done = False
     while not done:
         status, done = downloader.next_chunk()
 
-
-print('Archivo "list.csv" descargado correctamente.')
-
+print(f'Archivo "{list_name}.csv" descargado correctamente.')
 
 magatzem = [[[0, None, 0] for _ in range(10)] for _ in range(10)]
 for fila in magatzem:
