@@ -18,17 +18,17 @@ def visualitza(magatzem, camino, pick_locations):
     AZUL = (0, 0, 255)
 
     # Cargar la imagen "estanteria.jpg"
-    imagen_estanteria = pygame.image.load("pygame/estanteria.jpg")
+    imagen_estanteria = pygame.image.load("treballador/pygame/imatges/estanteria.jpg")
     # Escalar la imagen al tamaño de la celda
     imagen_estanteria = pygame.transform.scale(imagen_estanteria, (CELDA_ANCHO, int(CELDA_ALTO / 3)))
 
     # Cargar la imagen del suelo
-    imagen_suelo = pygame.image.load("pygame/terra.jpg")
+    imagen_suelo = pygame.image.load("treballador/pygame/imatges/terra.jpg")
     # Escalar la imagen al tamaño de la celda
     imagen_suelo = pygame.transform.scale(imagen_suelo, (CELDA_ANCHO, int(CELDA_ALTO / 3)))
 
     # Cargar la imagen "llibreta.png"
-    imagen_llibreta = pygame.image.load("pygame/llibreta.png")
+    imagen_llibreta = pygame.image.load("treballador/pygame/imatges/llibreta.png")
     # Escalar la imagen al tamaño deseado
     imagen_llibreta = pygame.transform.scale(imagen_llibreta, (350, 600))
 
