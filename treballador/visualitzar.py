@@ -4,7 +4,7 @@ import sys
 def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
     
     ids_a_dibujar = [ids[1] for ids in pick_locations]
-    
+    pick_locations = [loc[0] for loc in pick_locations]
     # Dimensiones de la ventana y de cada celda
     ANCHO = 1400
     ALTO = 600
@@ -66,7 +66,7 @@ def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
                 celda = magatzem[i][j]
                 for k, elemento in enumerate(celda):
                     if elemento in ids_a_dibujar:
-                        pygame.draw.circle(ventana, AZUL, ((i+1) * CELDA_ANCHO + (CELDA_ANCHO//2), j * CELDA_ALTO + k * (CELDA_ALTO / 3) + 10), 10)
+                        pygame.draw.circle(ventana, AZUL, ((i+1) * CELDA_ANCHO + (CELDA_ANCHO//2), j * CELDA_ALTO + k * (CELDA_ALTO // 3) + 10), 10)
 
         # Dibujar el camino
         for pos in camino:
@@ -104,6 +104,9 @@ def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
 
             pygame.draw.circle(ventana, NEGRO, (x_actual * CELDA_ANCHO + CELDA_ANCHO // 2, y_actual * CELDA_ALTO + CELDA_ALTO // 2), 20)
 
+            if (x_actual, y_actual) in pick_locations:
+                pygame.event.wait()
+            
             if x_actual != x_destino or y_actual != y_destino:
                 posicion_actual = (x_actual + dx // CELDA_ANCHO, y_actual + dy // CELDA_ALTO)
                 if posicion_actual not in camino:
@@ -116,6 +119,7 @@ def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
                     posicion_actual = posiciones_destino[indice_destino]
                     if posicion_actual not in camino:
                         camino.append(posicion_actual)
+            
 
         pygame.display.flip()
         pygame.time.delay(500)  # Reducción del retraso para un movimiento más lento
