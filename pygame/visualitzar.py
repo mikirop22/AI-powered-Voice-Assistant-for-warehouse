@@ -61,8 +61,12 @@ def visualitza(magatzem, camino, pick_locations):
                     if elemento is not None:
                         ventana.blit(imagen_estanteria, (j * CELDA_ANCHO, i * CELDA_ALTO + k * (CELDA_ALTO / 3)))
 
+        for i in range(10):
+            for j in range(10+2):
+                celda = magatzem[i][j]
+                for k, elemento in enumerate(celda):
                     if elemento in ids_a_dibujar:
-                        pygame.draw.circle(ventana, AZUL, (i * CELDA_ANCHO + CELDA_ANCHO // 2, j * CELDA_ALTO + k * (CELDA_ALTO // 3) + (CELDA_ALTO // 6) * (k+1)), 10)
+                        pygame.draw.circle(ventana, AZUL, ((i+1) * CELDA_ANCHO + (CELDA_ANCHO//2), j * CELDA_ALTO + k * (CELDA_ALTO / 3) + 10), 10)
 
         # Dibujar el camino
         for pos in camino:
