@@ -86,15 +86,6 @@ with open('treballador/list.csv', 'r') as file:
         product_ids.append(product_id)
         quantitat = row[1]
         quantitas[product_id] = quantitat
-    
-"""while True:
-    product_id = input("Entra l'ID del producte (o 'fi' per acabar): ")
-    if product_id == "fi":
-        break
-    if product_id in product_locations:
-        product_ids.append(product_id)
-    else:
-        print("ID de producte invàlid. Torna-ho a provar.")"""
 
 print("Productes seleccionats:")
 for product_id in product_ids:
