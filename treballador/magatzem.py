@@ -57,9 +57,10 @@ class Warehouse:
         return camino
 
 
-    def find_min_path(self, start_x, start_y):
+    def find_min_path(self, start_x, start_y, final_x, final_y):
         print(self.pick_locations)
         remaining_pick_locations = list(self.pick_locations)
+        remaining_pick_locations.append((final_x, final_y))
         path = []
         
         for punt in remaining_pick_locations:

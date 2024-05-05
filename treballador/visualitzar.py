@@ -103,7 +103,7 @@ def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
             dy = (y_destino - y_actual) * CELDA_ALTO // 40  # Movimiento más lento
 
             pygame.draw.circle(ventana, NEGRO, (x_actual * CELDA_ANCHO + CELDA_ANCHO // 2, y_actual * CELDA_ALTO + CELDA_ALTO // 2), 20)
-
+            
             if (x_actual, y_actual) in pick_locations:
                 pygame.event.wait()
             

@@ -99,7 +99,8 @@ for product_id in product_ids:
 # Busca i visualitza el camí mínim per recollir els productes seleccionats al magatzem
 print("\nCamí mínim per recollir els productes:")
 start_x, start_y = 0, 0
-path = warehouse.find_min_path(start_x, start_y)
+final_x, final_y = 11, 11
+path = warehouse.find_min_path(start_x, start_y, final_x, final_y)
 
 if path is not None:
     warehouse.visualize_path(path, nom_i_quantitas)
