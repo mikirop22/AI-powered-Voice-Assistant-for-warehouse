@@ -1,4 +1,5 @@
 import csv
+import os
 import speech_recognition as sr
 import numpy as np
 import librosa
@@ -10,41 +11,36 @@ recognizer = sr.Recognizer()
 def recognize_custom(audio):
     pass
 
+def agregar_producto(name, cantidad, input_csv, output_csv):
+    # Determinar si el archivo de salida existe y está vacío
+    output_exists_and_empty = os.path.isfile(output_csv) and os.stat(output_csv).st_size == 0
 
+    # Leer el archivo CSV de entrada y escribir las filas en el archivo de salida
+    with open(input_csv, 'r', newline='', encoding='utf-8') as input_file, \
+         open(output_csv, 'a', newline='', encoding='utf-8') as output_file:
+        
+        reader = csv.DictReader(input_file, delimiter=';')
+        fieldnames = ['id', 'cantidad']  # Selección de columnas para el archivo de salida
+        writer = csv.DictWriter(output_file, fieldnames=fieldnames, delimiter=';')
 
-def agregar_producto(name, input_csv, output_csv):
-    # Lista para almacenar las filas completas
-    filas_completas = []
+        # Escribir el encabezado solo si el archivo de salida no existe o está vacío
+        if output_exists_and_empty:
+            writer.writeheader()
 
-    # Leer el archivo CSV de entrada y añadir los parámetros completos a la lista
-    with open(input_csv, 'r', newline='', encoding='utf-8') as file:
-        reader = csv.DictReader(file, delimiter=';')
+        # Verificar si la cantidad seleccionada no supera el stock
+        stock_superado = False
         for row in reader:
             if row['name'] == name:
-                filas_completas.append(row)
+                if 'stock' in row and int(row['stock']) < cantidad:
+                    print(f"¡Advertencia! La cantidad seleccionada ({cantidad}) supera el stock disponible ({row['stock']}) para el producto '{name}'.")
+                    stock_superado = True
+                    break
 
-    # Si no se encontró ningún producto con el nombre dado, salir de la función
-    if not filas_completas:
-        print(f"No se encontró ningún producto con el nombre '{name}' en el archivo CSV.")
-        return
-
-    # Escribir los parámetros completos en un nuevo archivo CSV
-    with open(output_csv, 'w', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames=filas_completas[0].keys(), delimiter=';')
-        writer.writeheader()
-        for row in filas_completas:
-            writer.writerow(row)
-
-    print(f"Se ha añadido el elementos con el nombre '{name}' en el archivo '{output_csv}'.")
-
-
-# Definir el mapeo entre palabras técnicas y palabras reconocidas por Google
-mapeo_palabras = {
-    "OTINET 125mililitros": ["otinet 125 ml"],
-    "DEPO MODERIN 5mililitros": ["depo modern 5 ml", "pepo modern 5 ml", "Depo mothering 5 ml"],
-    "VETREGUL GEL 50mililitros": ["vertegui gel 50 ml"]
-}
-
+        if not stock_superado:
+            row['cantidad'] = cantidad
+            output_row = {'id': row['id'], 'cantidad': cantidad}  # Selección de columnas para cada fila
+            writer.writerow(output_row)
+            print(f"Se ha añadido el elemento con el nombre '{name}' y la cantidad '{cantidad}' en el archivo '{output_csv}'.")
 
 while True:
     with sr.Microphone() as mic:
@@ -118,7 +114,7 @@ while True:
                         cantidad = recognizer.recognize_google(audio, language="es-ES")
                         print(f"La cantidad es: {cantidad}")
                         # Añadir la cantidad tambieeen!!!
-                        agregar_producto(product_name, "productos.csv", "productos_nuevos.csv")
+                        agregar_producto(product_name, cantidad, "products.csv", "list.csv")
                         print("Producto añadido exitosamente.")
                         x = False
 
@@ -138,12 +134,6 @@ while True:
                         
                         # Llamar a la función recognize_custom con el audio en formato MP3
                         product_name = recognize_custom("audio_temp.mp3")
-
-
-"""
-
-
-            
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
@@ -151,4 +141,24 @@ while True:
         except sr.RequestError as e:
             print("Error ocurrido; {0}".format(e))
 
-# La llista generada s'ha de guardar i pujar d'alguna manera al núbol, per tal que es pugui accedir de forma fàcil desde la terminal del treballador del magatzem
+
+
+# ENVIAR LA LLISTA A GOOGLE DIRVE, per tal que es pugui accedir de forma fàcil desde la terminal del treballador del magatzem
+from googleapiclient.discovery import build
+from google.oauth2.service_account import Credentials
+from googleapiclient.http import MediaFileUpload
+
+# Define las credenciales
+credentials = Credentials.from_service_account_file('subtle-circlet-422322-b5-50795e26a89a.json')
+
+# Autentica con las credenciales
+drive_service = build('drive', 'v3', credentials=credentials)
+
+# Carga el archivo 'list.csv' a Google Drive
+file_metadata = {'name': 'list.csv'}
+media = MediaFileUpload('list.csv', mimetype='text/csv')
+file = drive_service.files().create(body=file_metadata,
+                                    media_body=media,
+                                    fields='id').execute()
+
+print('Archivo "list.csv" cargado correctamente con el ID:', file.get('id'))
