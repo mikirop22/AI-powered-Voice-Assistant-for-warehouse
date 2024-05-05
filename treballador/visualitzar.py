@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 
+
 def visualitza(magatzem, camino, pick_locations, nom_quantitas_pos):
     
     visitadas = set()  # Utilizamos un conjunto para un acceso más eficiente
@@ -94,6 +95,8 @@ def visualitza(magatzem, camino, pick_locations, nom_quantitas_pos):
         fuente = pygame.font.Font(None, tamano_fuente)
 
         for idx, id in enumerate(ids_a_dibujar):
+            nom = nom_quantitas_pos[id][0]
+            quant = nom_quantitas_pos[id][1]
             texto = fuente.render(str(nom_quantitas_pos[id][0]), False, NEGRO)
             ventana.blit(texto, (ANCHO - CELDA_ANCHO * 4, idx * 40 + 115))
             texto = fuente.render(str(nom_quantitas_pos[id][1]), False, NEGRO)
@@ -103,6 +106,7 @@ def visualitza(magatzem, camino, pick_locations, nom_quantitas_pos):
             pos = nom_quantitas_pos[id][2]
             if (pos[0], pos[1]) in visitadas:
                 pygame.draw.rect(ventana, VERDE, (ANCHO - CELDA_ANCHO * 4 - 30, idx * 40 + 114, 16, 16))
+                
 
         if not pausa:  
             # Calcular el movimiento gradual del círculo si no ha llegado a la última posición
@@ -116,6 +120,7 @@ def visualitza(magatzem, camino, pick_locations, nom_quantitas_pos):
                 visitadas.add((x_actual, y_actual))  # Marcar la celda como visitada
                 
                 if (x_actual, y_actual) in pick_locations:
+                    
                     pygame.event.wait()
                 
                 if x_actual != x_destino or y_actual != y_destino:
