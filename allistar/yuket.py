@@ -1,5 +1,6 @@
 import csv
 import os
+import tempfile
 import speech_recognition as sr
 import numpy as np
 import librosa
@@ -7,18 +8,26 @@ import pandas as pd
 import difflib
 import json
 import pyttsx3
-import gTTS
+from gtts import gTTS
 from pydub.playback import play
 
 
 from pydub import AudioSegment
 
 def speak(text):
-    tts = gTTS.gTTS(text, lang='es')
+    # Crear el objeto gTTS
+    tts = gTTS(text, lang='es')
 
-    audio = AudioSegment.from_mp3(tts.get_urls()[0])
+    # Crear un archivo temporal para almacenar el audio
+    with tempfile.NamedTemporaryFile(delete=False) as temp_audio:
+        temp_audio_path = temp_audio.name
+        tts.save(temp_audio_path)
 
-    play(audio)
+        # Cargar el audio como un segmento de audio
+        audio_segment = AudioSegment.from_mp3(temp_audio_path)
+
+        # Reproducir el audio
+        play(audio_segment)
 
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
@@ -91,11 +100,20 @@ mapeo_palabras["VETREGUL GEL 50mililitros"].extend(["vertegui gel 50ml", "verteg
 
 enviar = False
 
+lista_creada = False
+activar = True
 while True:
     with sr.Microphone() as mic:
-        speak("¿En que puedo ayudarte?")
-        recognizer.adjust_for_ambient_noise(mic, duration=0.7)
-        audio = recognizer.listen(mic)
+        if activar:
+            speak("¿En que puedo ayudarte?")
+            activar = False
+            recognizer.adjust_for_ambient_noise(mic, duration=0.3)
+            audio = recognizer.listen(mic)
+        
+        else:
+            speak("¿Que más quieres hacer?")    
+            recognizer.adjust_for_ambient_noise(mic, duration=0.3)
+            audio = recognizer.listen(mic)
 
         try:
             # Reconocer el audio utilizando Google Speech Recognition
@@ -111,80 +129,84 @@ while True:
                 speak("Que nombre le quieres poner a la lista?")
                 audio = recognizer.listen(mic)
                 nombre_lista = recognizer.recognize_google(audio, language="es-ES")
-                print(f"El nombre de la lista es: {nombre_lista}")
+                speak(f"El nombre de la lista es: {nombre_lista}")
+                lista_creada = True
 
-                
-            # Si se detecta "añadir", se espera la siguiente palabra
-            if "añadir" in text.lower():
-                speak("Escuchando producto")
-                audio = recognizer.listen(mic, timeout=None)
-                text = recognizer.recognize_google(audio, language="es-ES")
-                print("Grabación finalizada")
-                print("Dijiste: {}".format(text))
+            
+            if lista_creada:    
+                # Si se detecta "añadir", se espera la siguiente palabra
+                if "añadir" in text.lower():
+                    speak("Escuchando producto")
+                    audio = recognizer.listen(mic, timeout=None)
+                    text = recognizer.recognize_google(audio, language="es-ES")
+                    print("Grabación finalizada")
+                    print("Dijiste: {}".format(text))
 
 
 
-                # Dentro del bloque try:
-                # Buscar la palabra reconocida en el diccionario
-                done = False
-                for tecnica, reconocidas in mapeo_palabras.items():
-                    if text in reconocidas:
-                        palabra_tecnica = tecnica
-                        done = True
-                        break
-                # Si no se encuentra una coincidencia exacta, buscar la palabra más cercana
-                if done == False:
-                    closest_match = difflib.get_close_matches(text, [word for sublist in mapeo_palabras.values() for word in sublist], n=1)
-                    if closest_match:
-                        palabra_tecnica = closest_match[0]
-                        # Convertir la palabra técnica en la palabra original
-                        for tecnica, reconocidas in mapeo_palabras.items():
-                            if palabra_tecnica in reconocidas:
-                                palabra_tecnica = tecnica
-                                break   
-                        print(f"No se encontró una coincidencia exacta para '{text}'. La palabra más cercana es '{palabra_tecnica}'")
-                    else:
-                        palabra_tecnica = None   
+                    # Dentro del bloque try:
+                    # Buscar la palabra reconocida en el diccionario
+                    done = False
+                    for tecnica, reconocidas in mapeo_palabras.items():
+                        if text in reconocidas:
+                            palabra_tecnica = tecnica
+                            done = True
+                            break
+                    # Si no se encuentra una coincidencia exacta, buscar la palabra más cercana
+                    if done == False:
+                        closest_match = difflib.get_close_matches(text, [word for sublist in mapeo_palabras.values() for word in sublist], n=1)
+                        if closest_match:
+                            palabra_tecnica = closest_match[0]
+                            # Convertir la palabra técnica en la palabra original
+                            for tecnica, reconocidas in mapeo_palabras.items():
+                                if palabra_tecnica in reconocidas:
+                                    palabra_tecnica = tecnica
+                                    break   
+                            print(f"No se encontró una coincidencia exacta para '{text}'. La palabra más cercana es '{palabra_tecnica}'")
+                        else:
+                            palabra_tecnica = None   
 
-                if palabra_tecnica is not None:
-                    print(f"Palabra técnica correspondiente a '{text}': {palabra_tecnica}")
-                    speak(f"Producto detectado: {palabra_tecnica}")
-                    speak("¿Es correcto? ")
-                    print("¿Es correcto? (sí/no)")
-                    audio = recognizer.listen(mic)
-                    response = recognizer.recognize_google(audio, language="es-ES")
-                    x  =  True
-                    while x:
+                    if palabra_tecnica is not None:
+                        print(f"Palabra técnica correspondiente a '{text}': {palabra_tecnica}")
+                        speak(f"Producto detectado: {palabra_tecnica}")
+                        speak("¿Es correcto? ")
+                        print("¿Es correcto? (sí/no)")
+                        audio = recognizer.listen(mic)
+                        response = recognizer.recognize_google(audio, language="es-ES")
+                        
                         if "salir" in response.lower():
                             break
-                        if "sí" or "Sí" in response.lower():
-                            speak("Que cantidad quieres?")
+                        
+                        if "si" in response.lower() or "sí" in response.lower():
+                            speak("¿Qué cantidad quieres?")
                             audio = recognizer.listen(mic)
                             cantidad = recognizer.recognize_google(audio, language="es-ES")
                             print(f"La cantidad es: {cantidad}")
-                            # Añadir la cantidad tambieeen!!!
+                            # ¡Añadir la cantidad también!
                             agregar_producto(palabra_tecnica, cantidad, "products_new.csv", "productos_nuevos.csv")
                             speak("Producto añadido exitosamente.")
                             x = False
-
+                            
                         elif "no" in response.lower():
                             pass
-                    
-                else:
-                    print(f"No se encontró una palabra técnica para '{text}'")
-            if "eliminar ultima" in text.lower():
-                speak("Eliminando el último producto")
-                # Eliminar el último producto de la lista
-                eliminar_ultimo_producto("productos_nuevos.csv")
-            
-            if "terminar" in text.lower():
-                speak("Enviando lista")
-                acabar = True
-                break
+
+                        
+                    else:
+                        print(f"No se encontró una palabra técnica para '{text}'")
+                        
+                if "eliminar ultima" in text.lower():
+                    speak("Eliminando el último producto")
+                    # Eliminar el último producto de la lista
+                    eliminar_ultimo_producto("productos_nuevos.csv")
+                
+                if "terminar" in text.lower():
+                    speak(f"Enviando lista {nombre_lista}")
+                    enviar = True
+                    break
 
                 
         except sr.UnknownValueError:
-            print("Lo siento, no pude entender el audio.")
+            speak("Lo siento, no pude entender el audio.")
 
         except sr.RequestError as e:
             print("Error ocurrido; {0}".format(e))
