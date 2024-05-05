@@ -1,12 +1,12 @@
 import pygame
 import sys
 
-def visualitza(magatzem, camino, pick_locations):
+def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
     
     ids_a_dibujar = [ids[1] for ids in pick_locations]
     
     # Dimensiones de la ventana y de cada celda
-    ANCHO = 1300
+    ANCHO = 1400
     ALTO = 600
     CELDA_ANCHO = 80
     CELDA_ALTO = 60
@@ -30,7 +30,7 @@ def visualitza(magatzem, camino, pick_locations):
     # Cargar la imagen "llibreta.png"
     imagen_llibreta = pygame.image.load("treballador/pygame/imatges/llibreta.png")
     # Escalar la imagen al tamaño deseado
-    imagen_llibreta = pygame.transform.scale(imagen_llibreta, (350, 600))
+    imagen_llibreta = pygame.transform.scale(imagen_llibreta, (450, 600))
 
     # Inicializar Pygame
     pygame.init()
@@ -75,12 +75,25 @@ def visualitza(magatzem, camino, pick_locations):
         # Dibujar la imagen de la llibreta
         ventana.blit(imagen_llibreta, (ANCHO - imagen_llibreta.get_width(), 0))
 
-        # Dibujar IDs a la derecha con cuadrados al lado
+        tamano_fuente = 30
+
+        texto = fuente.render(str('PRODUCT'), True, NEGRO)
+        ventana.blit(texto, (ANCHO - CELDA_ANCHO * 3.25, 70))
+        texto = fuente.render(str('QUANT'), True, NEGRO)
+        ventana.blit(texto, (ANCHO - CELDA_ANCHO * 1.25, 70))
+       
+        tamano_fuente = 20  # Ajusta este valor según lo pequeña que desees la letra
+        # Cargar la fuente con el nuevo tamaño
+        fuente = pygame.font.Font(None, tamano_fuente)
+
         for idx, id in enumerate(ids_a_dibujar):
-            texto = fuente.render(str(id), True, NEGRO)
-            ventana.blit(texto, (ANCHO - CELDA_ANCHO * 2.75, idx * 40 + 100))
+            texto = fuente.render(str(nom_i_quantitas[id][0]), False, NEGRO)
+            ventana.blit(texto, (ANCHO - CELDA_ANCHO * 4, idx * 40 + 115))
+            texto = fuente.render(str(nom_i_quantitas[id][1]), False, NEGRO)
+            ventana.blit(texto, (ANCHO - CELDA_ANCHO * 1, idx * 40 + 115))
             # Dibujar el perímetro de un cuadrado al lado del índice
-            pygame.draw.rect(ventana, NEGRO, (ANCHO - CELDA_ANCHO * 2.75 - 40, idx * 40 + 100, 20, 20), 2)
+            pygame.draw.rect(ventana, NEGRO, (ANCHO - CELDA_ANCHO * 4 - 32, idx * 40 + 112, 20, 20), 2)
+
 
         # Calcular el movimiento gradual del círculo si no ha llegado a la última posición
         if not ultima_posicion:

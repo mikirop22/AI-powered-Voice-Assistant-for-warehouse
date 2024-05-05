@@ -85,7 +85,7 @@ class Warehouse:
             
         return path
         
-    def visualize_path(self, path):
+    def visualize_path(self, path, nom_i_quantitas):
         for y in range(self.height):
             for x in range(self.width):
                 if (x, y) in self.pick_locations:
@@ -98,7 +98,7 @@ class Warehouse:
                     print('.', end=' ')  # Free space
             print()
         print('final', path)
-        visualitza(self.magatzem, path, self.pick_locations_id)
+        visualitza(self.magatzem, path, self.pick_locations_id, nom_i_quantitas)
 
 """# Example usage:
 warehouse = Warehouse(5, 5)

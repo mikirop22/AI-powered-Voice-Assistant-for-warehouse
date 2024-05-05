@@ -65,6 +65,7 @@ warehouse = Warehouse(12, 10, magatzem)
 
 # Llegeix les dades del document products_new.csv i guarda les ubicacions dels productes
 product_locations = {}
+noms = {}
 with open('products_new.csv', 'r') as file:
     reader = csv.reader(file, delimiter=';')
     next(reader)  # Salta la primera fila (encapçalament)
@@ -73,10 +74,12 @@ with open('products_new.csv', 'r') as file:
         fila = int(row[3]) 
         columna = int(row[4]) 
         product_locations[product_id] = (fila, columna)
+        nom = row[1]
+        noms[product_id] = nom
 
 # Pregunta a l'usuari els IDs dels productes fins que introdueixi "fi"
 product_ids = []
-quantitas = {}
+nom_i_quantitas = {}
 with open('treballador/list.csv', 'r') as file:
     reader = csv.reader(file, delimiter=';')
     print(2,reader)
@@ -85,7 +88,7 @@ with open('treballador/list.csv', 'r') as file:
         product_id = row[0]
         product_ids.append(product_id)
         quantitat = row[1]
-        quantitas[product_id] = quantitat
+        nom_i_quantitas[product_id] = [noms[product_id], quantitat]
 
 print("Productes seleccionats:")
 for product_id in product_ids:
@@ -104,6 +107,6 @@ start_x, start_y = 0, 0
 path = warehouse.find_min_path(start_x, start_y)
 
 if path is not None:
-    warehouse.visualize_path(path)
+    warehouse.visualize_path(path, nom_i_quantitas)
 else:
     print("No se encontró un camino válido.")
