@@ -7,14 +7,14 @@ import pandas as pd
 import difflib
 import json
 import pyttsx3
-import gtts as gTTS
+import gTTS
 from pydub.playback import play
 
 
 from pydub import AudioSegment
 
 def speak(text):
-    tts = gTTS(text, lang='es')
+    tts = gTTS.gTTS(text, lang='es')
 
     audio = AudioSegment.from_mp3(tts.get_urls()[0])
 
@@ -25,6 +25,25 @@ recognizer = sr.Recognizer()
 
 def recognize_custom(audio):
     pass
+
+def eliminar_ultimo_producto(output_csv):
+    # Leer el archivo CSV de salida y eliminar la última fila
+    with open(output_csv, 'r', newline='', encoding='utf-8') as input_file:
+        reader = csv.DictReader(input_file, delimiter=';')
+        rows = [row for row in reader]
+
+    if rows:
+        with open(output_csv, 'w', newline='', encoding='utf-8') as output_file:
+            fieldnames = ['id', 'cantidad']
+            writer = csv.DictWriter(output_file, fieldnames=fieldnames, delimiter=';')
+            writer.writeheader()
+            writer.writerows(rows[:-1])
+            print("Se ha eliminado el último elemento del archivo '{output_csv}'.")
+
+    else:
+        print("No hay elementos para eliminar en el archivo '{output_csv}'.")
+
+    
 
 def agregar_producto(name, cantidad, input_csv, output_csv):
     # Determinar si el archivo de salida existe y está vacío
@@ -70,6 +89,7 @@ mapeo_palabras["OTINET 125mililitros"].extend(["otinet 125ml", "otinet 125milili
 mapeo_palabras["DEPO MODERIN 5mililitros"].extend(["depo modern 5ml", "depo moderin 5ml", "depo modern", "depo moderin", "depo"])
 mapeo_palabras["VETREGUL GEL 50mililitros"].extend(["vertegui gel 50ml", "vertegui gel 50", "vertegui", "gel 50ml", "gel 50"])
 
+enviar = False
 
 while True:
     with sr.Microphone() as mic:
@@ -152,6 +172,15 @@ while True:
                     
                 else:
                     print(f"No se encontró una palabra técnica para '{text}'")
+            if "eliminar ultima" in text.lower():
+                speak("Eliminando el último producto")
+                # Eliminar el último producto de la lista
+                eliminar_ultimo_producto("productos_nuevos.csv")
+            
+            if "terminar" in text.lower():
+                speak("Enviando lista")
+                acabar = True
+                break
 
                 
         except sr.UnknownValueError:
@@ -162,22 +191,24 @@ while True:
 
 
 
-# ENVIAR LA LLISTA A GOOGLE DIRVE, per tal que es pugui accedir de forma fàcil desde la terminal del treballador del magatzem
-from googleapiclient.discovery import build
-from google.oauth2.service_account import Credentials
-from googleapiclient.http import MediaFileUpload
 
-# Define las credenciales
-credentials = Credentials.from_service_account_file('subtle-circlet-422322-b5-50795e26a89a.json')
+if enviar:
+    # ENVIAR LA LLISTA A GOOGLE DIRVE, per tal que es pugui accedir de forma fàcil desde la terminal del treballador del magatzem
+    from googleapiclient.discovery import build
+    from google.oauth2.service_account import Credentials
+    from googleapiclient.http import MediaFileUpload
 
-# Autentica con las credenciales
-drive_service = build('drive', 'v3', credentials=credentials)
+    # Define las credenciales
+    credentials = Credentials.from_service_account_file('subtle-circlet-422322-b5-50795e26a89a.json')
 
-# Carga el archivo 'list.csv' a Google Drive
-file_metadata = {'name': 'productos_nuevos.csv'}
-media = MediaFileUpload('productos_nuevos.csv', mimetype='text/csv')
-file = drive_service.files().create(body=file_metadata,
-                                    media_body=media,
-                                    fields='id').execute()
+    # Autentica con las credenciales
+    drive_service = build('drive', 'v3', credentials=credentials)
 
-print('Archivo "productos_nuevos.csv" cargado correctamente con el ID:', file.get('id'))
+    # Carga el archivo 'list.csv' a Google Drive
+    file_metadata = {'name': 'productos_nuevos.csv'}
+    media = MediaFileUpload('productos_nuevos.csv', mimetype='text/csv')
+    file = drive_service.files().create(body=file_metadata,
+                                        media_body=media,
+                                        fields='id').execute()
+
+    print('Archivo "productos_nuevos.csv" cargado correctamente con el ID:', file.get('id'))
