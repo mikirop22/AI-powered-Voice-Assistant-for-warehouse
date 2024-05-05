@@ -6,7 +6,19 @@ import librosa
 import pandas as pd
 import difflib
 import json
+import pyttsx3
+import gtts as gTTS
+from pydub.playback import play
 
+
+from pydub import AudioSegment
+
+def speak(text):
+    tts = gTTS(text, lang='es')
+
+    audio = AudioSegment.from_mp3(tts.get_urls()[0])
+
+    play(audio)
 
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
@@ -61,7 +73,7 @@ mapeo_palabras["VETREGUL GEL 50mililitros"].extend(["vertegui gel 50ml", "verteg
 
 while True:
     with sr.Microphone() as mic:
-        print("Di algo...")
+        speak("¿En que puedo ayudarte?")
         recognizer.adjust_for_ambient_noise(mic, duration=0.7)
         audio = recognizer.listen(mic)
 
@@ -73,13 +85,21 @@ while True:
             # Si se detecta "salir", se rompe el bucle
             if "salir" in text.lower():
                 break
+
+            if "crear lista" in text.lower():
+                print("Creando lista...")
+                speak("Que nombre le quieres poner a la lista?")
+                audio = recognizer.listen(mic)
+                nombre_lista = recognizer.recognize_google(audio, language="es-ES")
+                print(f"El nombre de la lista es: {nombre_lista}")
+
                 
             # Si se detecta "añadir", se espera la siguiente palabra
             if "añadir" in text.lower():
-                print("Escuchando siguiente palabra...")
+                speak("Escuchando producto")
                 audio = recognizer.listen(mic, timeout=None)
                 text = recognizer.recognize_google(audio, language="es-ES")
-                print("Grabación finalizada.")
+                print("Grabación finalizada")
                 print("Dijiste: {}".format(text))
 
 
@@ -103,11 +123,13 @@ while True:
                                 palabra_tecnica = tecnica
                                 break   
                         print(f"No se encontró una coincidencia exacta para '{text}'. La palabra más cercana es '{palabra_tecnica}'")
-                        
+                    else:
+                        palabra_tecnica = None   
 
                 if palabra_tecnica is not None:
                     print(f"Palabra técnica correspondiente a '{text}': {palabra_tecnica}")
-                    print(f"Producto detectado: {palabra_tecnica}")
+                    speak(f"Producto detectado: {palabra_tecnica}")
+                    speak("¿Es correcto? ")
                     print("¿Es correcto? (sí/no)")
                     audio = recognizer.listen(mic)
                     response = recognizer.recognize_google(audio, language="es-ES")
@@ -116,13 +138,13 @@ while True:
                         if "salir" in response.lower():
                             break
                         if "sí" or "Sí" in response.lower():
-                            print("Que cantidad quieres?")
+                            speak("Que cantidad quieres?")
                             audio = recognizer.listen(mic)
                             cantidad = recognizer.recognize_google(audio, language="es-ES")
                             print(f"La cantidad es: {cantidad}")
                             # Añadir la cantidad tambieeen!!!
                             agregar_producto(palabra_tecnica, cantidad, "products_new.csv", "productos_nuevos.csv")
-                            print("Producto añadido exitosamente.")
+                            speak("Producto añadido exitosamente.")
                             x = False
 
                         elif "no" in response.lower():
