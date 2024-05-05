@@ -4,6 +4,7 @@ import speech_recognition as sr
 import numpy as np
 import librosa
 import pandas as pd
+import difflib
 
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
@@ -42,6 +43,17 @@ def agregar_producto(name, cantidad, input_csv, output_csv):
             writer.writerow(output_row)
             print(f"Se ha añadido el elemento con el nombre '{name}' y la cantidad '{cantidad}' en el archivo '{output_csv}'.")
 
+
+
+
+# Definir el mapeo entre palabras técnicas y palabras reconocidas por Google
+mapeo_palabras = {
+    "OTINET 125mililitros": ["otinet 125 ml"],
+    "DEPO MODERIN 5mililitros": ["de pomo 5 ml", "depo modern 5 ml", "pepo modern 5 ml", "Depo modeling 5 ml", "Depo mothering 5 ml"],
+    "VETREGUL GEL 50mililitros": ["vertegui gel 50 ml"]
+}
+
+
 while True:
     with sr.Microphone() as mic:
         print("Di algo...")
@@ -65,11 +77,28 @@ while True:
                 print("Grabación finalizada.")
                 print("Dijiste: {}".format(text))
 
+
+
+                # Dentro del bloque try:
                 # Buscar la palabra reconocida en el diccionario
+                done = False
                 for tecnica, reconocidas in mapeo_palabras.items():
                     if text in reconocidas:
                         palabra_tecnica = tecnica
+                        done = True
                         break
+                # Si no se encuentra una coincidencia exacta, buscar la palabra más cercana
+                if done == False:
+                    closest_match = difflib.get_close_matches(text, [word for sublist in mapeo_palabras.values() for word in sublist], n=1)
+                    if closest_match:
+                        palabra_tecnica = closest_match[0]
+                        # Convertir la palabra técnica en la palabra original
+                        for tecnica, reconocidas in mapeo_palabras.items():
+                            if palabra_tecnica in reconocidas:
+                                palabra_tecnica = tecnica
+                                break   
+                        print(f"No se encontró una coincidencia exacta para '{text}'. La palabra más cercana es '{palabra_tecnica}'")
+                        
 
                 if palabra_tecnica is not None:
                     print(f"Palabra técnica correspondiente a '{text}': {palabra_tecnica}")
@@ -81,13 +110,13 @@ while True:
                     while x:
                         if "salir" in response.lower():
                             break
-                        if "sí" in response.lower():
+                        if "sí" or "Sí" in response.lower():
                             print("Que cantidad quieres?")
                             audio = recognizer.listen(mic)
                             cantidad = recognizer.recognize_google(audio, language="es-ES")
                             print(f"La cantidad es: {cantidad}")
                             # Añadir la cantidad tambieeen!!!
-                            agregar_producto(palabra_tecnica, "products.csv", "productos_nuevos.csv")
+                            agregar_producto(palabra_tecnica, cantidad, "products_new.csv", "productos_nuevos.csv")
                             print("Producto añadido exitosamente.")
                             x = False
 
@@ -97,43 +126,6 @@ while True:
                 else:
                     print(f"No se encontró una palabra técnica para '{text}'")
 
-                
-                # Comprobar si el producto es correcto
-
-                """print(f"Producto detectado: {product_name}")
-                print("¿Es correcto? (sí/no)")
-                audio = recognizer.listen(mic)
-                response = recognizer.recognize_google(audio, language="es-ES")
-                x  =  True
-                while x:
-                    if "salir" in response.lower():
-                        break
-                    if "sí" in response.lower():
-                        print("Que cantidad quieres?")
-                        audio = recognizer.listen(mic)
-                        cantidad = recognizer.recognize_google(audio, language="es-ES")
-                        print(f"La cantidad es: {cantidad}")
-                        # Añadir la cantidad tambieeen!!!
-                        agregar_producto(product_name, cantidad, "products.csv", "list.csv")
-                        print("Producto añadido exitosamente.")
-                        x = False
-
-                    elif "no" in response.lower():
-                        print("Por favor, repita el nombre del producto.")
-                        print("Escuchando siguiente palabra...")
-                        audio = recognizer.listen(mic, timeout=None)
-                        print("Grabación finalizada.")
-
-                        # Guardar el audio en formato WAV
-                        with open("audio_temp.wav", "wb") as f:
-                            f.write(audio.get_wav_data())
-                        
-                        # Convertir el audio a formato MP3
-                        sound = AudioSegment.from_wav("audio_temp.wav")
-                        sound.export("audio_temp.mp3", format="mp3")
-                        
-                        # Llamar a la función recognize_custom con el audio en formato MP3
-                        product_name = recognize_custom("audio_temp.mp3")
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
@@ -155,10 +147,10 @@ credentials = Credentials.from_service_account_file('subtle-circlet-422322-b5-50
 drive_service = build('drive', 'v3', credentials=credentials)
 
 # Carga el archivo 'list.csv' a Google Drive
-file_metadata = {'name': 'list.csv'}
-media = MediaFileUpload('list.csv', mimetype='text/csv')
+file_metadata = {'name': 'productos_nuevos.csv'}
+media = MediaFileUpload('productos_nuevos.csv', mimetype='text/csv')
 file = drive_service.files().create(body=file_metadata,
                                     media_body=media,
                                     fields='id').execute()
 
-print('Archivo "list.csv" cargado correctamente con el ID:', file.get('id'))
+print('Archivo "productos_nuevos.csv" cargado correctamente con el ID:', file.get('id'))
