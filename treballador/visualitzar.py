@@ -1,8 +1,9 @@
 import pygame
-import sys
+from pygame.locals import *
 
-def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
+def visualitza(magatzem, camino, pick_locations, nom_quantitas_pos):
     
+    visitadas = set()  # Utilizamos un conjunto para un acceso más eficiente
     ids_a_dibujar = [ids[1] for ids in pick_locations]
     pick_locations = [loc[0] for loc in pick_locations]
     # Dimensiones de la ventana y de cada celda
@@ -15,6 +16,7 @@ def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
     NEGRO = (0, 0, 0)
     BLANCO = (255, 255, 255)
     ROJO = (255, 0, 0)
+    VERDE = (0, 255, 0)
     AZUL = (0, 0, 255)
 
     # Cargar la imagen "estanteria.jpg"
@@ -45,11 +47,15 @@ def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
     indice_destino = 0  
     posicion_actual = posiciones_destino[indice_destino]  
     ultima_posicion = False  
+    pausa = False
 
     while ejecutando:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 ejecutando = False
+            elif event.type == KEYDOWN:
+                if event.key == K_SPACE:
+                    pausa = not pausa
 
         # Dibujar la matriz y el camino
         ventana.fill(BLANCO)
@@ -70,7 +76,8 @@ def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
 
         # Dibujar el camino
         for pos in camino:
-            pygame.draw.rect(ventana, ROJO, (pos[0] * CELDA_ANCHO + CELDA_ANCHO // 2 - 5, pos[1] * CELDA_ALTO + CELDA_ALTO // 2 - 5, 10, 10))
+            if (int(pos[0]), pos[1]) in visitadas:
+                pygame.draw.rect(ventana, ROJO, (pos[0] * CELDA_ANCHO + CELDA_ANCHO // 2 - 5, pos[1] * CELDA_ALTO + CELDA_ALTO // 2 - 5, 10, 10))
 
         # Dibujar la imagen de la llibreta
         ventana.blit(imagen_llibreta, (ANCHO - imagen_llibreta.get_width(), 0))
@@ -87,38 +94,42 @@ def visualitza(magatzem, camino, pick_locations, nom_i_quantitas):
         fuente = pygame.font.Font(None, tamano_fuente)
 
         for idx, id in enumerate(ids_a_dibujar):
-            texto = fuente.render(str(nom_i_quantitas[id][0]), False, NEGRO)
+            texto = fuente.render(str(nom_quantitas_pos[id][0]), False, NEGRO)
             ventana.blit(texto, (ANCHO - CELDA_ANCHO * 4, idx * 40 + 115))
-            texto = fuente.render(str(nom_i_quantitas[id][1]), False, NEGRO)
+            texto = fuente.render(str(nom_quantitas_pos[id][1]), False, NEGRO)
             ventana.blit(texto, (ANCHO - CELDA_ANCHO * 1, idx * 40 + 115))
             # Dibujar el perímetro de un cuadrado al lado del índice
             pygame.draw.rect(ventana, NEGRO, (ANCHO - CELDA_ANCHO * 4 - 32, idx * 40 + 112, 20, 20), 2)
+            pos = nom_quantitas_pos[id][2]
+            if (pos[0], pos[1]) in visitadas:
+                pygame.draw.rect(ventana, VERDE, (ANCHO - CELDA_ANCHO * 4 - 30, idx * 40 + 114, 16, 16))
 
+        if not pausa:  
+            # Calcular el movimiento gradual del círculo si no ha llegado a la última posición
+            if not ultima_posicion:
+                x_actual, y_actual = posicion_actual
+                x_destino, y_destino = posiciones_destino[indice_destino]
+                dx = (x_destino - x_actual) * CELDA_ANCHO // 40  # Movimiento más lento
+                dy = (y_destino - y_actual) * CELDA_ALTO // 40  # Movimiento más lento
 
-        # Calcular el movimiento gradual del círculo si no ha llegado a la última posición
-        if not ultima_posicion:
-            x_actual, y_actual = posicion_actual
-            x_destino, y_destino = posiciones_destino[indice_destino]
-            dx = (x_destino - x_actual) * CELDA_ANCHO // 40  # Movimiento más lento
-            dy = (y_destino - y_actual) * CELDA_ALTO // 40  # Movimiento más lento
-
-            pygame.draw.circle(ventana, NEGRO, (x_actual * CELDA_ANCHO + CELDA_ANCHO // 2, y_actual * CELDA_ALTO + CELDA_ALTO // 2), 20)
-            
-            if (x_actual, y_actual) in pick_locations:
-                pygame.event.wait()
-            
-            if x_actual != x_destino or y_actual != y_destino:
-                posicion_actual = (x_actual + dx // CELDA_ANCHO, y_actual + dy // CELDA_ALTO)
-                if posicion_actual not in camino:
-                    camino.append(posicion_actual)
-            else:
-                if indice_destino == len(posiciones_destino) - 1:
-                    ultima_posicion = True
-                else:
-                    indice_destino = (indice_destino + 1) % len(posiciones_destino)
-                    posicion_actual = posiciones_destino[indice_destino]
+                pygame.draw.circle(ventana, NEGRO, (x_actual * CELDA_ANCHO + CELDA_ANCHO // 2, y_actual * CELDA_ALTO + CELDA_ALTO // 2), 20)
+                visitadas.add((x_actual, y_actual))  # Marcar la celda como visitada
+                
+                if (x_actual, y_actual) in pick_locations:
+                    pygame.event.wait()
+                
+                if x_actual != x_destino or y_actual != y_destino:
+                    posicion_actual = (x_actual + dx // CELDA_ANCHO, y_actual + dy // CELDA_ALTO)
                     if posicion_actual not in camino:
                         camino.append(posicion_actual)
+                else:
+                    if indice_destino == len(posiciones_destino) - 1:
+                        ultima_posicion = True
+                    else:
+                        indice_destino = (indice_destino + 1) % len(posiciones_destino)
+                        posicion_actual = posiciones_destino[indice_destino]
+                        if posicion_actual not in camino:
+                            camino.append(posicion_actual)
             
 
         pygame.display.flip()
