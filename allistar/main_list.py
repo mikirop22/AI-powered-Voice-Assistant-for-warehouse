@@ -32,9 +32,6 @@ def speak(text):
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
 
-def recognize_custom(audio):
-    pass
-
 def eliminar_ultimo_producto(output_csv):
     # Leer el archivo CSV de salida y eliminar la última fila
     with open(output_csv, 'r', newline='', encoding='utf-8') as input_file:
