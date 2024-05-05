@@ -68,12 +68,15 @@ while True:
             # Si se detecta "salir", se rompe el bucle
             if "salir" in text.lower():
                 break
+                
+            # Si se detecta "añadir", se espera la siguiente palabra
+            if "añadir" in text.lower():
+                print("Escuchando siguiente palabra...")
+                audio = recognizer.listen(mic, timeout=None)
+                text = recognizer.recognize_google(audio, language="es-ES")
+                print("Grabación finalizada.")
+                print("Dijiste: {}".format(text))
 
-            if "crear lista" in text.lower():
-                print("Pon un nombre a la lista. Te escucho")
-                audio = recognizer.listen(mic)
-                list_name = recognizer.recognize_google(audio, language="es-ES")
-                print(f"Tu lista se llama: {list_name}. Ahora puedes añadir productos con la palabra AÑADIR")
 
 
                 # Dentro del bloque try:
@@ -97,48 +100,9 @@ while True:
                         print(f"No se encontró una coincidencia exacta para '{text}'. La palabra más cercana es '{palabra_tecnica}'")
                         
 
-                # Si se detecta "añadir", se espera la siguiente palabra
-                if "añadir" in text.lower():
-                    print("Escuchando siguiente palabra...")
-                    audio = recognizer.listen(mic, timeout=None)
-                    text = recognizer.recognize_google(audio, language="es-ES")
-                    print("Grabación finalizada.")
-                    print("Dijiste: {}".format(text))
-
-                    # Buscar la palabra reconocida en el diccionario
-                    for tecnica, reconocidas in mapeo_palabras.items():
-                        if text in reconocidas:
-                            palabra_tecnica = tecnica
-                            break
-
-                    if palabra_tecnica is not None:
-                        print(f"Palabra técnica correspondiente a '{text}': {palabra_tecnica}")
-                        print(f"Producto detectado: {palabra_tecnica}")
-                        print("¿Es correcto? (sí/no)")
-                        audio = recognizer.listen(mic)
-                        response = recognizer.recognize_google(audio, language="es-ES")
-                        x  =  True
-                        while x:
-                            if "salir" in response.lower():
-                                break
-                            if "sí" in response.lower():
-                                print("Que cantidad quieres?")
-                                audio = recognizer.listen(mic)
-                                cantidad = recognizer.recognize_google(audio, language="es-ES")
-                                print(f"La cantidad es: {cantidad}")
-                                # Añadir la cantidad tambieeen!!!
-                                agregar_producto(palabra_tecnica, "products_new.csv", "list.csv")
-                                print("Producto añadido exitosamente.")
-                                x = False
-
-                            elif "no" in response.lower():
-                                pass
-                        
-                    else:
-                        print(f"No se encontró una palabra técnica para '{text}'")
-                    
-                    # Comprobar si el producto es correcto
-                    print(f"Producto detectado: {product_name}")
+                if palabra_tecnica is not None:
+                    print(f"Palabra técnica correspondiente a '{text}': {palabra_tecnica}")
+                    print(f"Producto detectado: {palabra_tecnica}")
                     print("¿Es correcto? (sí/no)")
                     audio = recognizer.listen(mic)
                     response = recognizer.recognize_google(audio, language="es-ES")
@@ -152,29 +116,16 @@ while True:
                             cantidad = recognizer.recognize_google(audio, language="es-ES")
                             print(f"La cantidad es: {cantidad}")
                             # Añadir la cantidad tambieeen!!!
-                            agregar_producto(product_name, cantidad, "products.csv", "list.csv")
                             agregar_producto(palabra_tecnica, cantidad, "products_new.csv", "productos_nuevos.csv")
                             print("Producto añadido exitosamente.")
                             x = False
 
                         elif "no" in response.lower():
-                            print("Por favor, repita el nombre del producto.")
-                            print("Escuchando siguiente palabra...")
-                            audio = recognizer.listen(mic, timeout=None)
-                            print("Grabación finalizada.")
+                            pass
+                    
+                else:
+                    print(f"No se encontró una palabra técnica para '{text}'")
 
-                            # Guardar el audio en formato WAV
-                            with open("audio_temp.wav", "wb") as f:
-                                f.write(audio.get_wav_data())
-                            
-                            # Convertir el audio a formato MP3
-                            sound = AudioSegment.from_wav("audio_temp.wav")
-                            sound.export("audio_temp.mp3", format="mp3")
-                            
-                            # Llamar a la función recognize_custom con el audio en formato MP3
-                            product_name = recognize_custom("audio_temp.mp3")
-                
-                if "enviar"
                 
         except sr.UnknownValueError:
             print("Lo siento, no pude entender el audio.")
@@ -203,4 +154,3 @@ file = drive_service.files().create(body=file_metadata,
                                     fields='id').execute()
 
 print('Archivo "productos_nuevos.csv" cargado correctamente con el ID:', file.get('id'))
-print('Archivo "list.csv" cargado correctamente con el ID:', file.get('id'))
