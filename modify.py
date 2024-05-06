@@ -1,5 +1,7 @@
-import csv
+"""import csv
 import random
+
+import pandas as pd
 
 # Definir la ruta del archivo CSV
 csv_file = "c:/Users/janbe/Desktop/products.csv"
@@ -26,4 +28,38 @@ with open(csv_file, 'w', newline='') as file:
     writer.writeheader()
     writer.writerows(data)
 
-print("Se han añadido las nuevas variables al archivo CSV con éxito.")
+print("Se han añadido las nuevas variables al archivo CSV con éxito.")"""
+
+# Función para limpiar el nombre
+def clean_name(name):
+    # Reemplazar comas por puntos decimales
+    name = name.replace(",", ".")
+    # Reemplazar guiones por espacios
+    name = name.replace("-", " ")
+    # Reemplazar '/' por 'por'
+    name = name.replace("/", " por ")
+    # Reemplazar 'ml' por 'mililitros'
+    name = name.replace("ml", "mililitros")
+    # Reemplazar 'mg' por 'miligramos'
+    name = name.replace("mg", "miligramos")
+    
+    for i, nom in enumerate(name):
+        if nom == 'x' or nom == 'X':
+            if name[i+1].isdigit() and name[i-1].isdigit():
+                name = name.replace("x", " por ")
+                
+    name = name.replace(' ', '_').replace('.', '')  # Aquí asignamos el resultado de los reemplazos nuevamente a 'name'
+    
+    return name
+
+
+import pandas as pd
+
+# Leer el conjunto de datos
+df = pd.read_csv("products_new.csv", sep=";")
+
+# Limpiar los nombres en el dataframe
+df["cleaned_name"] = df["name"].apply(clean_name)
+
+# Guardar el nuevo DataFrame en un archivo CSV
+df.to_csv("products_new.csv", sep=";", index=False)

@@ -11,51 +11,25 @@ import pyttsx3
 from gtts import gTTS
 from pydub.playback import play
 
-# Función para limpiar el nombre
-def clean_name(name):
-    # Reemplazar comas por puntos decimales
-    name = name.replace(",", ".")
-    # Reemplazar guiones por espacios
-    name = name.replace("-", " ")
-    # Reemplazar '/' por 'por'
-    name = name.replace("/", " por ")
-    # Reemplazar 'ml' por 'mililitros'
-    name = name.replace("ml", "mililitros")
-    # Reemplazar 'mg' por 'miligramos'
-    name = name.replace("mg", "miligramos")
-    
-    for i, nom in enumerate(name):
-        if nom == 'x' or nom == 'X':
-            if name[i+1].isdigit() and name[i-1].isdigit():
-                name = name.replace("x", " por ")
-    return name
-
-# Leer el conjunto de datos
-df = pd.read_csv("products_new.csv", sep=";")
-
-# Limpiar los nombres en el dataframe
-df["cleaned_name"] = df["name"].apply(clean_name)
-
-# Guardar el nuevo DataFrame en un archivo CSV
-df.to_csv("products_new.csv", sep=";", index=False)
-
 
 from pydub import AudioSegment
 
+# Inicializa el motor TTS
+engine = pyttsx3.init()
+
+# Configura la voz en español
+voices = engine.getProperty('voices')
+for voice in voices:
+    if 'spanish' in voice.name.lower():
+        engine.setProperty('voice', voice.id)
+        break
+
+engine.setProperty('rate', 150)
+
 def speak(text):
-    # Crear el objeto gTTS
-    tts = gTTS(text, lang='es')
-
-    # Crear un archivo temporal para almacenar el audio
-    with tempfile.NamedTemporaryFile(delete=False) as temp_audio:
-        temp_audio_path = temp_audio.name
-        tts.save(temp_audio_path)
-
-        # Cargar el audio como un segmento de audio
-        audio_segment = AudioSegment.from_mp3(temp_audio_path)
-
-        # Reproducir el audio
-        play(audio_segment)
+        
+    engine.say(text)
+    engine.runAndWait()
 
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
@@ -103,14 +77,15 @@ def agregar_producto(name, cantidad, input_csv, output_csv):
         stock_superado = False
         for row in reader:
             if row['cleaned_name'] == name:
+                id = row['id']
                 if 'stock' in row and int(row['stock']) < cantidad:
-                    print(f"¡Advertencia! La cantidad seleccionada ({cantidad}) supera el stock disponible ({row['stock']}) para el producto '{name}'.")
+                    speak(f"¡Advertencia! La cantidad seleccionada ({cantidad}) supera el stock disponible ({row['stock']}) para el producto '{name}'.")
                     stock_superado = True
                     break
 
         if not stock_superado:
             row['cantidad'] = cantidad
-            output_row = {'id': row['id'], 'cantidad': cantidad}  # Selección de columnas para cada fila
+            output_row = {'id': id, 'cantidad': cantidad}  # Selección de columnas para cada fila
             writer.writerow(output_row)
             print(f"Se ha añadido el elemento con el nombre '{name}' y la cantidad '{cantidad}' en el archivo '{output_csv}'.")
 
@@ -123,15 +98,16 @@ with open(ruta_archivo, "r") as archivo:
 
 
 # Añadir más valores a las claves existentes en el diccionario mapeo_palabras
-mapeo_palabras["OTINET 125mililitros"].extend(["otinet 125ml", "otinet 125mililitros", "otinet"])
-mapeo_palabras["DEPO MODERIN 5mililitros"].extend(["depo modern 5ml", "depo moderin 5ml", "depo modern", "depo moderin", "depo"])
-mapeo_palabras["VETREGUL GEL 50mililitros"].extend(["vertegui gel 50ml", "vertegui gel 50", "vertegui", "gel 50ml", "gel 50"])
+mapeo_palabras["OTINET_125mililitros"].extend(["otinet 125ml", "otinet 125mililitros", "otinet"])
+mapeo_palabras["DEPO_MODERIN_5mililitros"].extend(["depo modern 5ml", "depo moderin 5ml", "depo modern", "depo moderin", "depo"])
+mapeo_palabras["VETREGUL_GEL_50mililitros"].extend(["vertegui gel 50ml", "vertegui gel 50", "vertegui", "gel 50ml", "gel 50"])
 
 enviar = False
 
 lista_creada = False
 activar = True
 while True:
+    print('Escuchando...')
     with sr.Microphone() as mic:
         if activar:
             speak("¿En que puedo ayudarte?")
@@ -153,7 +129,7 @@ while True:
             if "salir" in text.lower():
                 break
 
-            elif "crear" and "lista" in text.lower():
+            elif "crear" in text.lower() and "lista" in text.lower():
                 print("Creando lista...")
                 speak("Que nombre le quieres poner a la lista?")
                 audio = recognizer.listen(mic)
@@ -199,27 +175,40 @@ while True:
                     if palabra_tecnica is not None:
                         print(f"Palabra técnica correspondiente a '{text}': {palabra_tecnica}")
                         speak(f"Producto detectado: {palabra_tecnica}")
+                        
+                    else:
+                        print(f"No se encontró una palabra técnica para '{text}'")
                     
                     finish = False
                     while not finish:
                         speak("¿Es correcto? ")
                         print("¿Es correcto? (sí/no)")
-                        audio = recognizer.listen(mic)
-                        response = recognizer.recognize_google(audio, language="es-ES")
+                        resposta = False
+                        while not resposta:
+                            try:    
+                                audio = recognizer.listen(mic)
+                                response = recognizer.recognize_google(audio, language="es-ES")
+                                resposta = True
+                            
+                            except sr.UnknownValueError:
+                                    speak("Lo siento, no te pude entender. ¿Podrías decir: Sí si es correcto o No si no es correcto?")
                             
                         if "salir" in response.lower():
+                            finish = True
                             break
 
-                        if "si" in response.lower() or "sí" in response.lower():
+                        elif "si" in response.lower() or "sí" in response.lower():
                             cantidad = True
                             while cantidad:
                                 speak("¿Qué cantidad quieres? ")
                                 audio = recognizer.listen(mic)
                                 cantidad = recognizer.recognize_google(audio, language="es-ES")
+                                print(cantidad)
 
                                 try:
                                     cantidad_entero = int(cantidad)
                                     speak(f"La cantidad es: {cantidad_entero}")
+                                    print(f'La cantidad es: {cantidad_entero}')
                                     # Aquí puedes usar cantidad_entero como un número entero
                                     # Por ejemplo, puedes usarlo para agregar el producto con la cantidad
                                     # Agregar el producto según tu implementación
@@ -238,11 +227,7 @@ while True:
                         
                         else:
                             print("No entiendo la respuesta, por favor intenta de nuevo.")
-                            
-
                         
-                    else:
-                        print(f"No se encontró una palabra técnica para '{text}'")
                         
                 elif "eliminar ultima" in text.lower():
                     speak("Eliminando el último producto")
@@ -277,8 +262,7 @@ if enviar:
 
     # Autentica con las credenciales
     drive_service = build('drive', 'v3', credentials=credentials)
-
-
+    
     # Carga el archivo 'list.csv' a Google Drive
     file_metadata = {'name': ruta}
     media = MediaFileUpload(ruta, mimetype='text/csv')

@@ -3,6 +3,7 @@ import os
 import tempfile
 
 from gtts import gTTS
+import pygame
 from magatzem import Warehouse
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
@@ -10,24 +11,27 @@ from googleapiclient.http import MediaIoBaseDownload
 from pydub import AudioSegment
 from pydub.playback import play
 import speech_recognition as sr
+import pyttsx3
 
 # Inicializar el reconocedor de voz
 recognizer = sr.Recognizer()
 
+# Inicializa el motor TTS
+engine = pyttsx3.init()
+
+# Configura la voz en español
+voices = engine.getProperty('voices')
+for voice in voices:
+    if 'spanish' in voice.name.lower():
+        engine.setProperty('voice', voice.id)
+        break
+
+engine.setProperty('rate', 150)
+
 def speak(text):
-    # Crear el objeto gTTS
-    tts = gTTS(text, lang='es')
-
-    # Crear un archivo temporal para almacenar el audio
-    with tempfile.NamedTemporaryFile(delete=False) as temp_audio:
-        temp_audio_path = temp_audio.name
-        tts.save(temp_audio_path)
-
-        # Cargar el audio como un segmento de audio
-        audio_segment = AudioSegment.from_mp3(temp_audio_path)
-
-        # Reproducir el audio
-        play(audio_segment)
+        
+    engine.say(text)
+    engine.runAndWait()
 
 #DESCARREGAR LA LLISTA
 # Define las credenciales
@@ -38,7 +42,7 @@ drive_service = build('drive', 'v3', credentials=credentials)
 
 
 trobat = False
-while not trobat:
+"""while not trobat:
     speak("Por favor, comuníqueme el nombre de la lista: ")
     with sr.Microphone() as mic:
         try:
@@ -58,24 +62,20 @@ while not trobat:
                 # Ruta completa del archivo con el nombre proporcionado por el usuario
                 file_path = os.path.join(directory, f'{list_name}.csv')
                 
-                # Comprobar si el archivo existe
-                if not os.path.exists(file_path):
-                    speak(f"El archivo {list_name} no existe.")
-                else:
-                    trobat = True
+                trobat = True
                 
         except sr.UnknownValueError:
             speak("Lo siento, no pude entender el audio.")
 
         except sr.RequestError as e:
-            print("Error ocurrido; {0}".format(e))
+            print("Error ocurrido; {0}".format(e))"""
 
+
+#speak("Por favor, ingresa el ID de la lista: ")
 list_id = input("Por favor, ingresa el ID de la lista: ")
 
-# Directorio donde deseas guardar el archivo
 directory = 'treballador/'
-
-# Ruta completa del archivo con el nombre proporcionado por el usuario
+list_name = input("nombre lista: ")
 file_path = os.path.join(directory, f'{list_name}.csv')
 
 # Descarga el archivo con el nombre proporcionado por el usuario desde Google Drive
@@ -86,7 +86,7 @@ with open(file_path, 'wb') as fh:
     while not done:
         status, done = downloader.next_chunk()
 
-print(f'Archivo "{list_name}.csv" descargado correctamente.')
+#speak(f'Archivo "{list_name}.csv" descargado correctamente.')
 
 magatzem = [[[0, None, 0] for _ in range(10)] for _ in range(10)]
 for fila in magatzem:

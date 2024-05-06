@@ -37,7 +37,8 @@ def visualitza(magatzem, camino, pick_locations, nom_quantitas_pos):
 
     # Inicializar Pygame
     pygame.init()
-    ventana = pygame.display.set_mode((ANCHO, ALTO))
+    
+    ventana = pygame.display.set_mode((ANCHO, ALTO), pygame.FULLSCREEN)
     pygame.display.set_caption("Magatzem")
 
     # Fuente para el texto
@@ -73,6 +74,7 @@ def visualitza(magatzem, camino, pick_locations, nom_quantitas_pos):
                 celda = magatzem[i][j]
                 for k, elemento in enumerate(celda):
                     if elemento in ids_a_dibujar:
+                        print(elemento)
                         pygame.draw.circle(ventana, AZUL, ((i+1) * CELDA_ANCHO + (CELDA_ANCHO//2), j * CELDA_ALTO + k * (CELDA_ALTO // 3) + 10), 10)
 
         # Dibujar el camino
