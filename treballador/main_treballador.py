@@ -42,7 +42,7 @@ drive_service = build('drive', 'v3', credentials=credentials)
 
 
 trobat = False
-"""while not trobat:
+while not trobat:
     speak("Por favor, comuníqueme el nombre de la lista: ")
     with sr.Microphone() as mic:
         try:
@@ -68,15 +68,11 @@ trobat = False
             speak("Lo siento, no pude entender el audio.")
 
         except sr.RequestError as e:
-            print("Error ocurrido; {0}".format(e))"""
+            print("Error ocurrido; {0}".format(e))
 
 
-#speak("Por favor, ingresa el ID de la lista: ")
+speak("Por favor, ingresa el ID de la lista: ")
 list_id = input("Por favor, ingresa el ID de la lista: ")
-
-directory = 'treballador/'
-list_name = input("nombre lista: ")
-file_path = os.path.join(directory, f'{list_name}.csv')
 
 # Descarga el archivo con el nombre proporcionado por el usuario desde Google Drive
 request = drive_service.files().get_media(fileId=list_id)
