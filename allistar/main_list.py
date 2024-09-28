@@ -256,9 +256,18 @@ if enviar:
     from googleapiclient.discovery import build
     from google.oauth2.service_account import Credentials
     from googleapiclient.http import MediaFileUpload
-
-    # Define las credenciales
-    credentials = Credentials.from_service_account_file('subtle-circlet-422322-b5-50795e26a89a.json')
+    import os
+    import json
+    
+    # Accede al secreto desde la variable de entorno
+    service_account_info = os.getenv("GOOGLE_CLOUD_KEY")
+    
+    # Cargar el secreto como un JSON
+    if service_account_info:
+        credentials_dict = json.loads(service_account_info)
+        credentials = Credentials.from_service_account_info(credentials_dict)
+    else:
+        raise Exception("Service account credentials not found.")
 
     # Autentica con las credenciales
     drive_service = build('drive', 'v3', credentials=credentials)
